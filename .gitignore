@@ -1,0 +1,13 @@
+# Laravel
+inventory-pos/.env
+inventory-pos/vendor
+inventory-pos/storage/logs
+inventory-pos/storage/framework
+
+# React
+inventory-frontend/node_modules
+inventory-frontend/dist
+
+# General
+.DS_Store
+.env
