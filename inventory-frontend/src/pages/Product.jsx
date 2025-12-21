@@ -1,32 +1,98 @@
-import React from "react";
 import MainLayout from "../layout/MainLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductModal from "../components/ProductModal";
 import api from "../api/axios";
+import { toast } from "react-toastify";
 
 export default function Product() {
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [products, setProducts] = useState([]);
+    const [cursor, setCursor] = useState(null);
+    const [offset, setOffset] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    console.log(cursor);
 
     const handleSave = async (product) => {
         try {
-            await api.post("/products", product);
-            setOpen(false);
-            // Optionally, refresh the product list here
+            const res = await api.post("/products", product);
+
+            if (res.status === 201) {
+                toast.success("Product added successfully!");
+                setOpen(false);
+
+                setProducts([]);
+                setCursor(null);
+                setOffset(0);
+                fetchProducts(null);
+            }
         } catch (err) {
-            console.error("Failed to save product:", err);
+            toast.error("Failed to add product");
+            console.error(err);
         }
+    };
+
+    const fetchProducts = async (cursorParam = null) => {
+        if (loading) return;
+
+        try {
+            setLoading(true);
+            const res = await api.get("/products", {
+                params: {
+                    search,
+                    cursor: cursorParam,
+                },
+            });
+            console.log(res.data);
+
+            const newItems = res.data.data || [];
+            setProducts((prev) =>
+                cursorParam ? [...prev, ...newItems] : newItems
+            );
+
+            setOffset((prev) =>
+                cursorParam ? prev + newItems.length : 0
+            );
+
+            setCursor(res.data.next_cursor || null);
+        } catch (err) {
+            toast.error("Failed to load products");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setProducts([]);
+            setCursor(null);
+            setOffset(0);
+            fetchProducts(null);
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+
+    const handleEdit = (product) => {
+        console.log("Edit:", product);
     };
 
     return (
         <MainLayout>
             <div>
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold text-slate-800">
                         Products
                     </h1>
 
-                    <button onClick={() => setOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button
+                        onClick={() => setOpen(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
                         Add Product
                     </button>
 
@@ -37,47 +103,96 @@ export default function Product() {
                     />
                 </div>
 
-                {/* Table */}
+                {/* Search */}
+                <div className="mb-4 text-right">
+                    <input
+                        type="text"
+                        className="w-64 px-3 py-2 border rounded"
+                        placeholder="Search products..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+
+
                 <div className="bg-white rounded shadow overflow-hidden">
                     <table className="min-w-full text-sm">
                         <thead className="bg-slate-100 text-slate-700">
                             <tr>
-                                <th className="px-4 py-3 text-left">ID</th>
+                                <th className="px-4 py-3 text-left">#</th>
                                 <th className="px-4 py-3 text-left">Name</th>
-                                <th className="px-4 py-3 text-right">Price</th>
+                                <th className="px-4 py-3 text-left">Cost</th>
+                                <th className="px-4 py-3 text-right">Unit</th>
+                                <th className="px-4 py-3 text-right">Selling</th>
                                 <th className="px-4 py-3 text-right">Stock</th>
                                 <th className="px-4 py-3 text-right">Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            <tr className="border-t hover:bg-slate-50">
-                                <td className="px-4 py-2">1</td>
-                                <td className="px-4 py-2">Product A</td>
-                                <td className="px-4 py-2 text-right">₱10.00</td>
-                                <td className="px-4 py-2 text-right">100</td>
-                                <td className="px-4 py-2 text-right">
-                                    <button className="text-blue-600 hover:underline"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                        <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
-                                    </svg>
-                                        Edit
-                                    </button>
-                                    <button className="ml-4 text-red-600 hover:underline"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102-1V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
-                                        Delete
-                                    </button>
-                                </td>
+                            {products.length === 0 && !loading && (
+                                <tr>
+                                    <td
+                                        colSpan="7"
+                                        className="px-4 py-6 text-center text-gray-500"
+                                    >
+                                        No products found
+                                    </td>
+                                </tr>
+                            )}
 
-                            </tr>
-
-                            <tr className="border-t hover:bg-slate-50">
-                                <td className="px-4 py-2">2</td>
-                                <td className="px-4 py-2">Product B</td>
-                                <td className="px-4 py-2 text-right">₱15.00</td>
-                                <td className="px-4 py-2 text-right">150</td>
-                            </tr>
+                            {products.map((product, index) => (
+                                <tr
+                                    key={product.id}
+                                    className="border-t hover:bg-slate-50"
+                                >
+                                    <td className="px-4 py-3">
+                                        {offset + index + 1}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {product.name}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {product.cost_price}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        {product.unit_type}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        {product.selling_price}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        {product.stock_qty}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <button
+                                            onClick={() => handleEdit(product)}
+                                            className="text-blue-600 hover:text-blue-800"
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
+
+                        {/* Pagination */}
+                        {cursor !== null && (
+                            <tfoot>
+                                <tr>
+                                    <td colSpan="7" className="px-4 py-3 text-center">
+                                        <button
+                                            onClick={() => fetchProducts(cursor)}
+                                            disabled={loading}
+                                            className="text-blue-600 hover:text-blue-800"
+                                        >
+                                            {loading ? "Loading..." : "Load More"}
+                                        </button>
+                                        
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        )}
                     </table>
                 </div>
             </div>

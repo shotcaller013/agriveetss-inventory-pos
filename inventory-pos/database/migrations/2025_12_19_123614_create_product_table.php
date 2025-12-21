@@ -15,12 +15,12 @@ return new class extends Migration
         $table->id();
 
         $table->string('name');
-        $table->string('sku')->nullable()->unique();
+        // $table->string('sku')->nullable()->unique();
         // $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
         $table->enum('unit_type', ['kg', 'pcs', 'pack'])->default('pcs');
         $table->decimal('cost_price', 10, 2);
         $table->decimal('selling_price', 10, 2);
-        $table->decimal('pack_size', 10, 3)->nullable(); // e.g., 0.5kg, 1kg
+        // $table->decimal('pack_size', 10, 3)->nullable(); // e.g., 0.5kg, 1kg
         $table->decimal('stock_qty', 10, 3)->default(0); // supports 0.25kg
         $table->decimal('reorder_level', 10, 3)->default(0);
 
