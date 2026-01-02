@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'unit_type',
@@ -13,7 +15,6 @@ class Product extends Model
         'selling_price',
         'stock_qty',
         'reorder_level',
-        'is_active',
     ];
 
     protected $casts = [
@@ -21,7 +22,7 @@ class Product extends Model
         'selling_price' => 'decimal:2',
         'stock_qty'     => 'integer',
         'reorder_level' => 'integer',
-        'is_active'     => 'boolean',
+        'deleted_at'    => 'datetime',
     ];
 }
 

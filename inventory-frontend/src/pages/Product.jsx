@@ -8,86 +8,83 @@ export default function Product() {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [products, setProducts] = useState([]);
-    const [cursor, setCursor] = useState(null);
-    const [offset, setOffset] = useState(0);
+    const [nextCursor, setNextCursor] = useState(null);
+    const [prevCursor, setPrevCursor] = useState(null);
     const [loading, setLoading] = useState(false);
-
-    console.log(cursor);
-
-    const handleSave = async (product) => {
-        try {
-            const res = await api.post("/products", product);
-
-            if (res.status === 201) {
-                toast.success("Product added successfully!");
-                setOpen(false);
-
-                setProducts([]);
-                setCursor(null);
-                setOffset(0);
-                fetchProducts(null);
-            }
-        } catch (err) {
-            toast.error("Failed to add product");
-            console.error(err);
-        }
-    };
+    const [editProduct, setEditProduct] = useState(false);
 
     const fetchProducts = async (cursorParam = null) => {
         if (loading) return;
-
         try {
             setLoading(true);
+
             const res = await api.get("/products", {
                 params: {
                     search,
                     cursor: cursorParam,
                 },
             });
-            console.log(res.data);
 
-            const newItems = res.data.data || [];
-            setProducts((prev) =>
-                cursorParam ? [...prev, ...newItems] : newItems
-            );
-
-            setOffset((prev) =>
-                cursorParam ? prev + newItems.length : 0
-            );
-
-            setCursor(res.data.next_cursor || null);
-        } catch (err) {
+            setProducts(res.data.data || []);
+            setNextCursor(res.data.next_cursor || null);
+            setPrevCursor(res.data.prev_cursor || null);
+        } catch {
             toast.error("Failed to load products");
-            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
+    const deleteProductById = async (id) => {
+        try {
+            await api.delete(`/products/${id}`);
+            setProducts((prev) => prev.filter((p) => p.id !== id));
+            toast.success("Product deleted successfully");
+        } catch {
+            toast.error("Failed to delete product");
+        }
+    };
 
+    
+
+
+    // Initial load + search
     useEffect(() => {
         const timer = setTimeout(() => {
-            setProducts([]);
-            setCursor(null);
-            setOffset(0);
             fetchProducts(null);
         }, 400);
 
         return () => clearTimeout(timer);
     }, [search]);
 
-
-    const handleEdit = (product) => {
-        console.log("Edit:", product);
+    const handleSave = async (data) => {
+        console.log("Saving product", data);
+        try {
+            if (editProduct) {
+                const res = await api.put(`/products/${editProduct.id}`, data);
+                setProducts((prev) => prev.map((p) => (p.id === editProduct.id ? res.data.product : p)));
+                toast.success("Product updated successfully");
+                setEditProduct(null);
+                setOpen(false);
+            }
+            else {
+                const res = await api.post("/products", data);
+                console.log("Product save response", res);
+                setProducts((prev) => [res.data.product, ...prev]);
+                toast.success("Product saved successfully");
+                setOpen(false);
+            }
+        } catch {
+            toast.error("Failed to add product");
+        }
     };
 
     return (
         <MainLayout>
             <div>
+                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-slate-800">
-                        Products
-                    </h1>
+                    <h1 className="text-2xl font-bold text-slate-800">Products</h1>
 
                     <button
                         onClick={() => setOpen(true)}
@@ -98,9 +95,14 @@ export default function Product() {
 
                     <ProductModal
                         open={open}
-                        onClose={() => setOpen(false)}
+                        product={editProduct}
+                        onClose={() => {
+                            setOpen(false);
+                            setEditProduct(null);
+                        }}
                         onSave={handleSave}
                     />
+
                 </div>
 
                 {/* Search */}
@@ -114,7 +116,7 @@ export default function Product() {
                     />
                 </div>
 
-
+                {/* Table */}
                 <div className="bg-white rounded shadow overflow-hidden">
                     <table className="min-w-full text-sm">
                         <thead className="bg-slate-100 text-slate-700">
@@ -130,31 +132,19 @@ export default function Product() {
                         </thead>
 
                         <tbody>
-                            {products.length === 0 && !loading && (
+                            {!loading && products.length === 0 && (
                                 <tr>
-                                    <td
-                                        colSpan="7"
-                                        className="px-4 py-6 text-center text-gray-500"
-                                    >
+                                    <td colSpan="7" className="px-4 py-6 text-center text-gray-500">
                                         No products found
                                     </td>
                                 </tr>
                             )}
 
                             {products.map((product, index) => (
-                                <tr
-                                    key={product.id}
-                                    className="border-t hover:bg-slate-50"
-                                >
-                                    <td className="px-4 py-3">
-                                        {offset + index + 1}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {product.name}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {product.cost_price}
-                                    </td>
+                                <tr key={product.id} className="border-t hover:bg-slate-50">
+                                    <td className="px-4 py-3">{index + 1}</td>
+                                    <td className="px-4 py-3">{product.name}</td>
+                                    <td className="px-4 py-3">{product.cost_price}</td>
                                     <td className="px-4 py-3 text-right">
                                         {product.unit_type}
                                     </td>
@@ -164,36 +154,41 @@ export default function Product() {
                                     <td className="px-4 py-3 text-right">
                                         {product.stock_qty}
                                     </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={() => handleEdit(product)}
-                                            className="text-blue-600 hover:text-blue-800"
-                                        >
+                                    <td className="px-4 py-3 text-right space-x-2">
+                                        <button onClick={() => { setEditProduct(product); setOpen(true); }} className="text-blue-600 hover:text-blue-800">
                                             Edit
+                                        </button>
+                                        <button onClick={() => { deleteProductById(product.id) }} className="text-red-600 hover:text-red-800">
+                                            Delete
                                         </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
-
-                        {/* Pagination */}
-                        {cursor !== null && (
-                            <tfoot>
-                                <tr>
-                                    <td colSpan="7" className="px-4 py-3 text-center">
-                                        <button
-                                            onClick={() => fetchProducts(cursor)}
-                                            disabled={loading}
-                                            className="text-blue-600 hover:text-blue-800"
-                                        >
-                                            {loading ? "Loading..." : "Load More"}
-                                        </button>
-                                        
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        )}
                     </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex justify-between mt-4">
+                    <button
+                        disabled={!prevCursor || loading}
+                        onClick={() => fetchProducts(prevCursor)}
+                        className="px-4 py-2 text-sm border rounded
+              disabled:opacity-50 disabled:cursor-not-allowed
+              hover:bg-gray-100"
+                    >
+                        Prev
+                    </button>
+
+                    <button
+                        disabled={!nextCursor || loading}
+                        onClick={() => fetchProducts(nextCursor)}
+                        className="px-4 py-2 text-sm text-white bg-blue-600 rounded
+              hover:bg-blue-700
+              disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Next
+                    </button>
                 </div>
             </div>
         </MainLayout>

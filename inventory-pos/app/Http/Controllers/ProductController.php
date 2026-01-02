@@ -7,7 +7,7 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
-    public function store(Request $request)
+    public function storeProduct(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -16,18 +16,39 @@ class ProductController extends Controller
             'selling_price' => 'required|numeric|min:0',
             'stock_qty' => 'nullable|numeric|min:0',
         ]);
+
         $product = Product::create($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Product created successfully',
-            'product' => $product
+            'product' => $product,
         ], 201);
+    }
+
+    public function updateProduct(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'unit_type' => 'sometimes|required|in:kg,pcs,pack',
+            'cost_price' => 'sometimes|required|numeric|min:0',
+            'selling_price' => 'sometimes|required|numeric|min:0',
+            'stock_qty' => 'sometimes|nullable|numeric|min:0',
+        ]);
+
+        $product = Product::findOrFail($id);
+        $product->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'product' => $product,
+        ]);
     }
 
     public function fetchProduct(Request $request)
     {
-        $query = Product::query()->orderBy('id');
+        $query = Product::orderBy('id');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%");
@@ -36,9 +57,21 @@ class ProductController extends Controller
         $products = $query->cursorPaginate(10);
 
         return response()->json([
-            'success' => true,
             'data' => $products->items(),
-            'next_cursor' => $products->nextCursor()?->encode(),
+            'next_cursor' => optional($products->nextCursor())->encode(),
+            'prev_cursor' => optional($products->previousCursor())->encode(),
+        ]);
+    }
+
+
+    public function deleteProduct($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product deleted successfully',
         ]);
     }
 }
