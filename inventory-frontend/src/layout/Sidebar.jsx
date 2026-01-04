@@ -20,12 +20,12 @@ export default function Sidebar() {
             </NavLink>
 
             <NavLink
-                to="/inventory"
+                to="/sales"
                 className={({ isActive }) =>
                     `${base} ${isActive ? active : inactive}`
                 }
             >
-                Inventory
+                Sales
             </NavLink>
 
             <NavLink

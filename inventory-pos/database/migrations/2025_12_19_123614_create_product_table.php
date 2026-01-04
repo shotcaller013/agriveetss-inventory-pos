@@ -22,7 +22,7 @@ return new class extends Migration
         $table->decimal('selling_price', 10, 2);
         // $table->decimal('pack_size', 10, 3)->nullable(); // e.g., 0.5kg, 1kg
         $table->decimal('stock_qty', 10, 3)->default(0); // supports 0.25kg
-        $table->decimal('reorder_level', 10, 3)->default(0);
+        // $table->decimal('reorder_level', 10, 3)->default(0);
         // $table->boolean('is_active')->default(true);
         $table->softDeletes();
         $table->timestamps();

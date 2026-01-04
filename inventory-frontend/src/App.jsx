@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Sales from "./pages/Sales";
 import Product from "./pages/Product";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -25,13 +26,13 @@ export default function App() {
                             : <Navigate to="/login" />
                     }
                 />
-
                 <Route
                     path="*"
                     element={<Navigate to={isAuth() ? "/dashboard" : "/login"} />}
                 />
 
                 <Route path="/products" element={isAuth() ? <Product /> : <Navigate to="/login" />} />
+                <Route path="/sales" element={isAuth() ? <Sales /> : <Navigate to="/login" />} />
             </Routes>
         </BrowserRouter>
     );
