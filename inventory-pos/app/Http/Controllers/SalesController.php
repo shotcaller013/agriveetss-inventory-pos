@@ -45,7 +45,8 @@ class SalesController extends Controller
                 abort(422, 'Insufficient cash');
             }
 
-            $reference = 'SALE-' . now()->format('Ymd') . '-' . (Sales::max('id') + 1);
+           $reference = 'SALE-' . now()->format('YmdHis') . '-' . Str::random(4);
+
 
             $sale = Sales::create([
                 'total_price'    => $total,

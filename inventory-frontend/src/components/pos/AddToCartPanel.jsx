@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "react";
+import { toast } from "react-toastify";
 
 export default function AddToCartPanel({ product, onAdd }) {
     const [qty, setQty] = useState("");
     const inputRef = useRef(null);
-
     useEffect(() => {
         setQty("");
         if (product) inputRef.current?.focus();
@@ -20,9 +20,15 @@ export default function AddToCartPanel({ product, onAdd }) {
 
     const quantity = Number(qty) || 0;
     const canAdd = quantity > 0;
+    const outStock = product.stock_qty < qty;
+    console.log(outStock);
 
     const handleAdd = () => {
         if (!canAdd) return;
+        if (outStock) {
+            toast.warning(`${product.name} is out of stock`);
+            return;
+        }
         onAdd({
             product_id: product.id,
             name: product.name,

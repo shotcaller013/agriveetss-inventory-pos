@@ -15,6 +15,8 @@ export default function Sales() {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
 
+    console.log(products);
+
     const fetchProducts = async () => {
         try {
             const res = await api.get("/products", { params: { search } });
@@ -119,6 +121,7 @@ export default function Sales() {
                                     onClick={() => setSelectedProduct(product)}
                                     className={`relative flex flex-col p-4 rounded-2xl bg-white transition-all duration-200 text-left shadow-sm hover:shadow-md active:scale-95 group border-2
                                         ${isSelected ? 'border-blue-500 ring-4 ring-blue-50' : 'border-transparent'}`}
+                                       
                                 >
                                     <div className="mb-3">
                                         <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{product.category?.name || 'Item'}</div>

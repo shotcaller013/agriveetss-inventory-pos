@@ -54,6 +54,12 @@ class ProductController extends Controller
             $query->where('name', 'like', "%{$request->search}%");
         }
 
+        if ($request->boolean('paginate') === false) {
+            return response()->json([
+                'data' => $query->get(),
+            ]);
+        }
+
         $products = $query->cursorPaginate(10);
 
         return response()->json([

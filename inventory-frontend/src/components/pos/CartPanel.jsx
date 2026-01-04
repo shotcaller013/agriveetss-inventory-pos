@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ConfirmDialog from "../ConfirmDialog";
 
 // helper peso sign
 
@@ -15,6 +16,7 @@ export default function CartPanel({
     loading = false,
 }) {
     const [cash, setCash] = useState("");
+    const [confirmOpen, setConfirmOpen] = useState(true);
 
     const total = cart.reduce(
         (sum, item) => sum + item.quantity * item.unit_price,
@@ -33,7 +35,7 @@ export default function CartPanel({
 
     return (
         <div className="bg-slate-50 rounded-2xl shadow-xl border border-slate-200 p-4 flex flex-col h-full max-h-[calc(100vh-2rem)]">
-            
+
             {/* Header with Clear Action */}
             <div className="flex items-center justify-between mb-4">
                 <div>
@@ -41,8 +43,8 @@ export default function CartPanel({
                     <p className="text-xs text-slate-400">{cart.length} unique items</p>
                 </div>
                 {cart.length > 0 && (
-                    <button 
-                        onClick={() => window.confirm("Clear all items?") && onClearCart()}
+                    <button
+                        onClick={() => setConfirmOpen(true)}
                         className="text-[10px] font-bold text-red-400 hover:text-red-600 uppercase tracking-tighter transition"
                     >
                         Clear All
@@ -150,6 +152,16 @@ export default function CartPanel({
                     )}
                 </button>
             </div>
+                <ConfirmDialog
+                    open={confirmOpen}
+                    title="Clear all items?"
+                    message="This will remove all items from the cart."
+                    onCancel={() => setConfirmOpen(false)}
+                    onConfirm={() => {
+                        onClearCart();
+                        setConfirmOpen(false);
+                    }}
+                />
         </div>
     );
 }
