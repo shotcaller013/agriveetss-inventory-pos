@@ -12,11 +12,10 @@ class SalesController extends Controller
     public function storeSale(Request $request)
     {
         $data = $request->validate([
-            'items'               => 'required|array|min:1',
-            'items.*.product_id'  => 'required|exists:products,id',
-            'items.*.quantity'    => 'required|numeric|min:0.01',
-            'items.*.unit_price'  => 'required|numeric|min:0',
-            'cash'                => 'required|numeric|min:0',
+            'items'              => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity'   => 'required|numeric|min:0.01',
+            'cash'               => 'required|numeric|min:0',
         ]);
 
         return DB::transaction(function () use ($data) {
@@ -28,7 +27,6 @@ class SalesController extends Controller
                 ->get()
                 ->keyBy('id');
 
-
             foreach ($data['items'] as $item) {
                 $product = $products[$item['product_id']];
 
@@ -36,7 +34,8 @@ class SalesController extends Controller
                     abort(422, "Insufficient stock for {$product->name}");
                 }
 
-                $total += $item['quantity'] * $item['unit_price'];
+                //  USE DB PRICE
+                $total += $item['quantity'] * $product->selling_price;
             }
 
             $change = $data['cash'] - $total;
@@ -45,14 +44,13 @@ class SalesController extends Controller
                 abort(422, 'Insufficient cash');
             }
 
-           $reference = 'SALE-' . now()->format('YmdHis') . '-' . Str::random(4);
-
+            $reference = 'SALE-' . now()->format('Ymd') . '-' . (Sales::max('id') + 1);
 
             $sale = Sales::create([
-                'total_price'    => $total,
-                'cash_received'  => $data['cash'],
-                'change_given'   => $change,
-                'reference'      => $reference,
+                'total_price'   => $total,
+                'cash_received' => $data['cash'],
+                'change_given'  => $change,
+                'reference'     => $reference,
             ]);
 
             foreach ($data['items'] as $item) {
@@ -61,8 +59,9 @@ class SalesController extends Controller
                 $sale->items()->create([
                     'product_id' => $product->id,
                     'quantity'   => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'subtotal'   => $item['quantity'] * $item['unit_price'],
+                    'unit_price' => $product->selling_price, //  DB price
+                    'cost_price' => $product->cost_price,    //  profit-safe
+                    'subtotal'   => $item['quantity'] * $product->selling_price,
                 ]);
 
                 $product->decrement('stock_qty', $item['quantity']);

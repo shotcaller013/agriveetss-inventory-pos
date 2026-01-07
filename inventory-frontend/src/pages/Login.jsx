@@ -36,7 +36,7 @@ export default function Login() {
                 className="w-full max-w-sm bg-white p-6 rounded shadow"
             >
                 <h2 className="text-2xl font-bold mb-4 text-center">
-                    Shaneyaa Agriveets Inventory Login
+                    Zhaneyaa Agriveets Inventory Login
                 </h2>
 
                 {error && (

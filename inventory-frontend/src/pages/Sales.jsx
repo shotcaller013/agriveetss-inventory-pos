@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import AddToCartPanel from "../components/pos/AddToCartPanel";
 import CartPanel from "../components/pos/CartPanel";
 import ReceiptPanel from "../components/pos/ReceiptPanel";
+import {BadgeDollarSign} from "lucide-react";
 
 export default function Sales() {
     const [products, setProducts] = useState([]);
@@ -98,7 +99,10 @@ export default function Sales() {
                 {/* LEFT: PRODUCT CATALOG (8 cols) */}
                 <div className="col-span-8 p-6 overflow-y-auto custom-scrollbar">
                     <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-black text-slate-800 tracking-tight">Catalog</h1>
+                        <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                            Catalog
+                            <BadgeDollarSign className="inline-block ml-2 text-blue-600" />
+                        </h1>
                         <div className="relative w-72">
                             <input
                                 value={search}

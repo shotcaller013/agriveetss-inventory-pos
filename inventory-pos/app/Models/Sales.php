@@ -8,8 +8,6 @@ use App\Models\SaleItem;
 class sales extends Model
 {
     protected $fillable = [
-        'quantity',
-        'unit_price',
         'total_price',
         'cash_received',
         'change_given',

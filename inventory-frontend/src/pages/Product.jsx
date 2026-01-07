@@ -4,254 +4,302 @@ import ProductModal from "../components/ProductModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../api/axios";
 import { toast } from "react-toastify";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Package,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+} from "lucide-react";
 
 export default function Product() {
-    const [open, setOpen] = useState(false);
-    const [search, setSearch] = useState("");
-    const [products, setProducts] = useState([]);
-    const [nextCursor, setNextCursor] = useState(null);
-    const [prevCursor, setPrevCursor] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [editProduct, setEditProduct] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [products, setProducts] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [prevCursor, setPrevCursor] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
 
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
-    const fetchProducts = async (cursorParam = null) => {
-        if (loading) return;
+  const fetchProducts = async (cursorParam = null) => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      const res = await api.get("/products", {
+        params: { search, cursor: cursorParam },
+      });
+      setProducts(res.data.data || []);
+      setNextCursor(res.data.next_cursor || null);
+      setPrevCursor(res.data.prev_cursor || null);
+    } catch {
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            setLoading(true);
-            const res = await api.get("/products", {
-                params: { search, cursor: cursorParam },
-            });
+  useEffect(() => {
+    const timer = setTimeout(() => fetchProducts(null), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-            setProducts(res.data.data || []);
-            setNextCursor(res.data.next_cursor || null);
-            setPrevCursor(res.data.prev_cursor || null);
-        } catch {
-            toast.error("Failed to load products");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleSave = async (data) => {
+    try {
+      if (editProduct) {
+        const res = await api.put(`/products/${editProduct.id}`, data);
+        setProducts((prev) =>
+          prev.map((p) => (p.id === editProduct.id ? res.data.product : p))
+        );
+        toast.success("Product updated");
+      } else {
+        const res = await api.post("/products", data);
+        setProducts((prev) => [res.data.product, ...prev]);
+        toast.success("Product added successfully");
+      }
+      setEditProduct(null);
+      setOpen(false);
+    } catch {
+      toast.error("Failed to save product");
+    }
+  };
 
-    useEffect(() => {
-        const timer = setTimeout(() => fetchProducts(null), 400);
-        return () => clearTimeout(timer);
-    }, [search]);
+  const confirmDelete = async () => {
+    try {
+      await api.delete(`/products/${deleteId}`);
+      setProducts((prev) => prev.filter((p) => p.id !== deleteId));
+      toast.success("Product removed from inventory");
+    } catch {
+      toast.error("Failed to delete product");
+    } finally {
+      setConfirmOpen(false);
+      setDeleteId(null);
+    }
+  };
 
-    const handleSave = async (data) => {
-        try {
-            if (editProduct) {
-                const res = await api.put(
-                    `/products/${editProduct.id}`,
-                    data
-                );
+  return (
+    <MainLayout>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        {/* 1. TOP HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+              <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
+                <Package size={24} />
+              </div>
+              Inventory Management
+            </h1>
+            <p className="text-slate-500 mt-1 font-medium">
+              Manage your products, pricing, and stock levels.
+            </p>
+          </div>
 
-                setProducts(prev =>
-                    prev.map(p =>
-                        p.id === editProduct.id ? res.data.product : p
-                    )
-                );
+          <button
+            onClick={() => setOpen(true)}
+            className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95"
+          >
+            <Plus size={20} />
+            Add New Product
+          </button>
+        </div>
 
-                toast.success("Product updated");
-            } else {
-                const res = await api.post("/products", data);
-                setProducts(prev => [res.data.product, ...prev]);
-                toast.success("Product added");
-            }
-
-            setEditProduct(null);
-            setOpen(false);
-        } catch {
-            toast.error("Failed to save product");
-        }
-    };
-
-    const confirmDelete = async () => {
-        try {
-            await api.delete(`/products/${deleteId}`);
-            setProducts(prev =>
-                prev.filter(p => p.id !== deleteId)
-            );
-            toast.success("Product deleted");
-        } catch {
-            toast.error("Failed to delete product");
-        } finally {
-            setConfirmOpen(false);
-            setDeleteId(null);
-        }
-    };
-
-    return (
-        <MainLayout>
-            <div className="space-y-6">
-                {/* Header + Actions */}
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-slate-800">
-                        Products
-                    </h1>
-
-                    <button
-                        onClick={() => setOpen(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg
-                           text-sm font-medium hover:bg-blue-700"
-                    >
-                        + Add Product
-                    </button>
-                </div>
-
-                {/* Toolbar */}
-                <div className="flex items-center justify-between">
-                    <input
-                        type="text"
-                        className="w-72 px-3 py-2 border rounded-lg text-sm
-                           focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="Search products..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-
-                {/* Product Modal */}
-                <ProductModal
-                    open={open}
-                    product={editProduct}
-                    onClose={() => {
-                        setOpen(false);
-                        setEditProduct(null);
-                    }}
-                    onSave={handleSave}
-                />
-
-                {/* Table */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <table className="min-w-full text-sm">
-                        <thead className="bg-slate-100 text-slate-600 uppercase text-xs">
-                            <tr>
-                                <th className="px-4 py-3 text-left">ID</th>
-                                <th className="px-4 py-3 text-left">Product</th>
-                                <th className="px-4 py-3 text-right">Cost</th>
-                                <th className="px-4 py-3 text-center">Unit</th>
-                                <th className="px-4 py-3 text-right">Selling</th>
-                                <th className="px-4 py-3 text-right">Stock</th>
-                                <th className="px-4 py-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="divide-y">
-                            {!loading && products.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan="7"
-                                        className="px-4 py-12 text-center text-gray-500"
-                                    >
-                                        No products found
-                                    </td>
-                                </tr>
-                            )}
-
-                            {products.map(product => (
-                                <tr
-                                    key={product.id}
-                                    className="hover:bg-slate-50 transition"
-                                >
-                                    <td className="px-4 py-3 text-gray-500">
-                                        {product.id}
-                                    </td>
-
-                                    <td className="px-4 py-3 font-medium">
-                                        {product.name}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-right">
-                                        ₱{Number(product.cost_price).toFixed(2)}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-center">
-                                        <span className="px-2 py-1 text-xs font-semibold bg-slate-200 rounded">
-                                            {product.unit_type.toUpperCase()}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-4 py-3 text-right">
-                                        ₱{Number(product.selling_price).toFixed(2)}
-                                    </td>
-
-                                    <td className="px-4 py-3 text-right">
-                                        <span
-                                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
-            ${product.stock_qty <= 5
-                                                    ? "bg-red-100 text-red-700"
-                                                    : "bg-green-100 text-green-700"
-                                                }`}
-                                        >
-                                            {product.stock_qty}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-4 py-3 text-right space-x-2">
-                                        <button
-                                            onClick={() => {
-                                                setEditProduct(product);
-                                                setOpen(true);
-                                            }}
-                                            className="text-blue-600 hover:text-blue-800"
-                                        >
-                                            ✎
-                                        </button>
-
-                                        <button
-                                            onClick={() => {
-                                                setDeleteId(product.id);
-                                                setConfirmOpen(true);
-                                            }}
-                                            className="text-red-600 hover:text-red-800"
-                                        >
-                                            🗑
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="flex justify-between items-center">
-                    <button
-                        disabled={!prevCursor || loading}
-                        onClick={() => fetchProducts(prevCursor)}
-                        className="px-4 py-2 text-sm border rounded-lg
-                           hover:bg-gray-100 disabled:opacity-50"
-                    >
-                        ← Prev
-                    </button>
-
-                    <button
-                        disabled={!nextCursor || loading}
-                        onClick={() => fetchProducts(nextCursor)}
-                        className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg
-                           hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        Next →
-                    </button>
-                </div>
-            </div>
-
-            {/* Confirm Dialog */}
-            <ConfirmDialog
-                open={confirmOpen}
-                title="Delete product"
-                message="This product will be permanently deleted."
-                onCancel={() => {
-                    setConfirmOpen(false);
-                    setDeleteId(null);
-                }}
-                onConfirm={confirmDelete}
+        {/* 2. TOOLBAR (Search & Quick Stats) */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-4">
+          <div className="relative w-full md:w-96">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
             />
-        </MainLayout>
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+              placeholder="Search by name, ID or category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-    );
+          <div className="flex items-center gap-2 text-slate-400 ml-auto">
+            <Filter size={16} />
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Sort: Newest First
+            </span>
+          </div>
+        </div>
+
+        {/* 3. PRODUCT TABLE */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-widest border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 text-left">SKU/ID</th>
+                  <th className="px-6 py-4 text-left">Product Name</th>
+                  <th className="px-6 py-4 text-right">Cost</th>
+                  <th className="px-6 py-4 text-center">Unit</th>
+                  <th className="px-6 py-4 text-right text-blue-600">
+                    Selling Price
+                  </th>
+                  <th className="px-6 py-4 text-right">Stock Level</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-100">
+                {loading && products.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-6 py-20 text-center text-slate-400 font-medium"
+                    >
+                      Syncing inventory...
+                    </td>
+                  </tr>
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center opacity-40">
+                        <Package size={48} className="mb-2" />
+                        <p className="font-bold">
+                          No products found in your database.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((product) => (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-slate-50/80 transition-colors group"
+                    >
+                      <td className="px-6 py-4 text-slate-400 font-mono text-xs">
+                        #{product.id}
+                      </td>
+
+                      <td className="px-6 py-4 font-bold text-slate-800">
+                        {product.name}
+                      </td>
+
+                      <td className="px-6 py-4 text-right text-slate-500 font-medium">
+                        ₱
+                        {Number(product.cost_price).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <span className="px-2.5 py-1 text-[10px] font-black bg-slate-100 text-slate-600 rounded-md uppercase tracking-tighter">
+                          {product.unit_type}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-right font-black text-slate-900 text-base">
+                        ₱
+                        {Number(product.selling_price).toLocaleString(
+                          undefined,
+                          { minimumFractionDigits: 2 }
+                        )}
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
+                                                    ${
+                                                      product.stock_qty <= 5
+                                                        ? "bg-red-50 text-red-600 border border-red-100"
+                                                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                                    }`}
+                        >
+                          {product.stock_qty <= 5 && <AlertCircle size={12} />}
+                          {product.stock_qty} {product.unit_type}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              setEditProduct(product);
+                              setOpen(true);
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit Product"
+                          >
+                            <Pencil size={18} />
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setDeleteId(product.id);
+                              setConfirmOpen(true);
+                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Product"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 4. PAGINATION */}
+        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <button
+            disabled={!prevCursor || loading}
+            onClick={() => fetchProducts(prevCursor)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm"
+          >
+            <ChevronLeft size={18} />
+            Previous
+          </button>
+
+          <div className="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Showing {products.length} Products
+          </div>
+
+          <button
+            disabled={!nextCursor || loading}
+            onClick={() => fetchProducts(nextCursor)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 disabled:opacity-30 transition-all shadow-md shadow-slate-200"
+          >
+            Next Page
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      <ProductModal
+        open={open}
+        product={editProduct}
+        onClose={() => {
+          setOpen(false);
+          setEditProduct(null);
+        }}
+        onSave={handleSave}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this product? This action cannot be undone and will affect your reports."
+        onCancel={() => {
+          setConfirmOpen(false);
+          setDeleteId(null);
+        }}
+        onConfirm={confirmDelete}
+      />
+    </MainLayout>
+  );
 }
