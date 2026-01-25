@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
+
 
 class ProductController extends Controller
 {
@@ -48,6 +50,7 @@ class ProductController extends Controller
 
     public function fetchProduct(Request $request)
     {
+        
         $query = Product::orderBy('id');
 
         if ($request->filled('search')) {
@@ -78,6 +81,27 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Product deleted successfully',
+        ]);
+    }
+
+    public function dashboardData()
+    {
+        dd('test');
+        $topProducts = DB::table('sale_items as qty')
+            ->leftJoin('products as pr', 'pr.id', '=', 'qty.product_id')
+            ->select(
+                'pr.id',
+                'pr.name',
+                DB::raw('SUM(qty.quantity) as total_quantity'),
+                DB::raw('SUM(qty.quantity * qty.unit_price) as total_sales')
+            )
+            ->groupBy('pr.id', 'pr.name')
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'top_products' => $topProducts,
         ]);
     }
 }

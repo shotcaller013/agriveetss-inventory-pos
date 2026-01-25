@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 import AddToCartPanel from "../components/pos/AddToCartPanel";
 import CartPanel from "../components/pos/CartPanel";
 import ReceiptPanel from "../components/pos/ReceiptPanel";
-import {BadgeDollarSign} from "lucide-react";
+import { BadgeDollarSign, Info, X } from "lucide-react"; // Added icons
+import CreditModal from "../components/CreditModal";
 
 export default function Sales() {
     const [products, setProducts] = useState([]);
@@ -15,8 +16,7 @@ export default function Sales() {
     const [receipt, setReceipt] = useState(null);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
-
-    console.log(products);
+    const [showCredits, setShowCredits] = useState(false); // New State
 
     const fetchProducts = async () => {
         try {
@@ -46,9 +46,10 @@ export default function Sales() {
             }
             return [...prev, item];
         });
-        setSelectedProduct(null); // Clear selection after adding
+        setSelectedProduct(null);
         toast.info(`${item.name} added to cart`, { autoClose: 1000, hideProgressBar: true });
     };
+
 
     const updateQty = (productId, delta) => {
         setCart(prev =>
@@ -83,7 +84,7 @@ export default function Sales() {
             setReceipt(res.data.sale);
             setCart([]);
             setSelectedProduct(null);
-            fetchProducts(); // Refresh stock if backend handles inventory
+            fetchProducts();
             toast.success("Sale completed successfully");
         } catch (err) {
             toast.error(err.response?.data?.message || "Checkout failed");
@@ -92,9 +93,24 @@ export default function Sales() {
         }
     };
 
+
+    const handleCreditSave = async (data) => {
+        console.log("Credit Data:", data);
+        try{
+            setLoading(true);
+            const res = await api.post("/credits", data);
+            console.log("Credit Save Response:", res.data);
+            toast.success("Credit saved successfully");
+
+        }catch(err){
+            console.error(err);
+        }finally{
+            setLoading(false);
+        }
+    };
     return (
-        <MainLayout>
-            <div className="h-[calc(100vh-64px)] grid grid-cols-12 bg-slate-100 overflow-hidden">
+        <>
+            <div className="h-[calc(100vh-64px)] grid grid-cols-12 bg-slate-100 overflow-hidden p-4 relative">
 
                 {/* LEFT: PRODUCT CATALOG (8 cols) */}
                 <div className="col-span-8 p-6 overflow-y-auto custom-scrollbar">
@@ -103,16 +119,27 @@ export default function Sales() {
                             Catalog
                             <BadgeDollarSign className="inline-block ml-2 text-blue-600" />
                         </h1>
-                        <div className="relative w-72">
-                            <input
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search by name or SKU..."
-                                className="w-full pl-10 pr-4 py-2 bg-white border-none rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 transition-all"
-                            />
-                            <svg className="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+
+                        <div className="flex items-center gap-3">
+                            <div className="relative w-72">
+                                <input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search by name or SKU..."
+                                    className="w-full pl-10 pr-4 py-2 bg-white border-none rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 transition-all"
+                                />
+                                <svg className="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+
+                            <button
+                                onClick={() => setShowCredits(true)}
+                                className="p-2.5 bg-white text-slate-500 hover:text-blue-600 rounded-xl shadow-sm hover:shadow-md transition-all border border-transparent hover:border-blue-100"
+                                title="Credits"
+                            >
+                                <Info size={20} />
+                            </button>
                         </div>
                     </div>
 
@@ -125,7 +152,6 @@ export default function Sales() {
                                     onClick={() => setSelectedProduct(product)}
                                     className={`relative flex flex-col p-4 rounded-2xl bg-white transition-all duration-200 text-left shadow-sm hover:shadow-md active:scale-95 group border-2
                                         ${isSelected ? 'border-blue-500 ring-4 ring-blue-50' : 'border-transparent'}`}
-                                       
                                 >
                                     <div className="mb-3">
                                         <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{product.category?.name || 'Item'}</div>
@@ -135,7 +161,7 @@ export default function Sales() {
                                         <div className="text-blue-600 font-black text-lg">
                                             ₱{Number(product.selling_price).toFixed(2)}
                                         </div>
-                                        <div className="text-[10px] font-bold text-slate-300 uppercase italic">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase italic">
                                             Per {product.unit_type}
                                         </div>
                                     </div>
@@ -168,7 +194,6 @@ export default function Sales() {
                                     onAdd={addToCart}
                                 />
                             </div>
-
                             <div className="flex-1 overflow-hidden">
                                 <CartPanel
                                     cart={cart}
@@ -182,6 +207,14 @@ export default function Sales() {
                     )}
                 </div>
             </div>
-        </MainLayout>
+
+            {/* Modal remains outside the layout flow but inside the fragment */}
+            <CreditModal
+                open={showCredits}
+                onClose={() => setShowCredits(false)}
+                onSave={handleCreditSave}
+                items={cart}
+            />
+        </>
     );
 }

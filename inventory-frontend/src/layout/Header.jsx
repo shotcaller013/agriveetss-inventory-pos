@@ -1,10 +1,17 @@
 import { Menu, LogOut, ShieldCheck } from "lucide-react";
+import api from "../api/axios";
 
 export default function Header({ onToggleSidebar }) {
-    const logout = () => {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+    const logout = async () => {
+        try {
+            await api.post("/logout");
+        } finally {
+            localStorage.removeItem("token");
+            delete api.defaults.headers.Authorization;
+            window.location.href = "/login";
+        }
     };
+
 
     return (
         <header className="h-16 bg-gray border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-20">
@@ -16,7 +23,7 @@ export default function Header({ onToggleSidebar }) {
                 >
                     <Menu size={24} />
                 </button>
-                
+
                 <div className="flex items-center gap-2">
                     {/* <div className="bg-blue-600 p-1.5 rounded-lg text-white">
                         <ShieldCheck size={20} />

@@ -85,16 +85,16 @@ export default function Product() {
 
   return (
     <MainLayout>
-      <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="space-y-6 animate-in fade-in duration-500 p-4">
         {/* 1. TOP HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
               <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
                 <Package size={24} />
               </div>
               Inventory Management
-            </h1>
+            </h3>
             <p className="text-slate-500 mt-1 font-medium">
               Manage your products, pricing, and stock levels.
             </p>
@@ -210,11 +210,10 @@ export default function Product() {
                       <td className="px-6 py-4 text-right">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
-                                                    ${
-                                                      product.stock_qty <= 5
-                                                        ? "bg-red-50 text-red-600 border border-red-100"
-                                                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                                    }`}
+                                                    ${product.stock_qty <= 5
+                              ? "bg-red-50 text-red-600 border border-red-100"
+                              : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            }`}
                         >
                           {product.stock_qty <= 5 && <AlertCircle size={12} />}
                           {product.stock_qty} {product.unit_type}
@@ -227,6 +226,7 @@ export default function Product() {
                             onClick={() => {
                               setEditProduct(product);
                               setOpen(true);
+
                             }}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Edit Product"

@@ -11,19 +11,21 @@ const initialState = {
 export default function ProductModal({ open, onClose, onSave, product }) {
     const [form, setForm] = useState(initialState);
 
-    // Sync form with product prop
     useEffect(() => {
-        if (open) {
-            setForm(product ? { ...product } : initialState);
+        if (!open) return;
+
+        if (product) {
+            setForm({
+                name: product.name ?? "",
+                unit_type: product.unit_type ?? "pcs",
+                cost_price: product.cost_price ?? "",
+                selling_price: product.selling_price ?? "",
+                stock_qty: product.stock_qty ?? "",
+            });
+        } else {
+            setForm(initialState);
         }
     }, [open, product]);
-
-    // Close on Escape key
-    useEffect(() => {
-        const handleEsc = (e) => { if (e.key === "Escape") onClose(); };
-        window.addEventListener("keydown", handleEsc);
-        return () => window.removeEventListener("keydown", handleEsc);
-    }, [onClose]);
 
     // Live Margin Calculation
     const marginStats = useMemo(() => {
@@ -40,7 +42,7 @@ export default function ProductModal({ open, onClose, onSave, product }) {
         const { name, value, type } = e.target;
         // Basic validation: Prevent negative numbers for prices/stock
         if (type === "number" && value < 0) return;
-        
+
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
@@ -51,7 +53,7 @@ export default function ProductModal({ open, onClose, onSave, product }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div 
+            <div
                 className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -65,7 +67,7 @@ export default function ProductModal({ open, onClose, onSave, product }) {
                             {product ? `ID: #${product.id}` : "Basic Details"}
                         </p>
                     </div>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white hover:shadow-md transition-all text-slate-400 hover:text-slate-600"
                     >

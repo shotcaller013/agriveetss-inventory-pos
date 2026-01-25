@@ -21,22 +21,31 @@ export default function App() {
 
                 <Route
                     path="/dashboard"
-                    element={
-                        isAuth()
-                            ? <Dashboard />
-                            : <Navigate to="/login" />
-                    }
+                    element={isAuth() ? <Dashboard /> : <Navigate to="/login" />}
                 />
+
+                <Route
+                    path="/products"
+                    element={isAuth() ? <Product /> : <Navigate to="/login" />}
+                />
+
+                <Route
+                    path="/sales"
+                    element={isAuth() ? <Sales /> : <Navigate to="/login" />}
+                />
+
+                <Route
+                    path="/sales-report"
+                    element={isAuth() ? <SalesReport /> : <Navigate to="/login" />}
+                />
+
+                {/* catch-all MUST be last */}
                 <Route
                     path="*"
                     element={<Navigate to={isAuth() ? "/dashboard" : "/login"} />}
                 />
-
-                <Route path="/products" element={isAuth() ? <Product /> : <Navigate to="/login" />} />
-                <Route path="/sales" element={isAuth() ? <Sales /> : <Navigate to="/login" />} />
-                <Route path="/sales-report" element={isAuth() ? <SalesReport /> : <Navigate to="/login" />} />
-                
             </Routes>
         </BrowserRouter>
-    );
+    )
 }
+

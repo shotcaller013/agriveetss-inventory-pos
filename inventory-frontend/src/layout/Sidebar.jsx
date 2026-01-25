@@ -18,7 +18,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
       <div className="p-4 flex items-center min-h-[72px] border-b border-slate-900/50">
         {!isCollapsed && (
           <h1 className="text-lg font-bold text-white tracking-tight flex-1 animate-in fade-in duration-300">
-            Admin<span className="text-blue-500">Pro</span>
+            {/* Admin<span className="text-blue-500">Pro</span> */}
           </h1>
         )}
         <button 
@@ -58,12 +58,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-900">
+      {/* <div className="p-4 border-t border-slate-900">
         <button className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-500/5 transition-all ${isCollapsed ? "justify-center" : ""}`}>
            <LogOut size={20} />
            {!isCollapsed && <span className="text-sm font-bold">Logout</span>}
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 }

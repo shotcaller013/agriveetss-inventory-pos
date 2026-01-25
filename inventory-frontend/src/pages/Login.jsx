@@ -16,7 +16,9 @@ export default function Login() {
 
         try {
             const { data } = await api.post("/login", { name, password });
+
             localStorage.setItem("token", data.token);
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
 
             navigate("/dashboard");
         } catch (err) {
@@ -28,8 +30,9 @@ export default function Login() {
         }
     };
 
+
     return (
-        
+
         <div className="min-h-screen flex items-center justify-center bg-slate-100">
             <form
                 onSubmit={submit}

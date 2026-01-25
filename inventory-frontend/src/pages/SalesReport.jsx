@@ -54,7 +54,7 @@ export default function SalesReport() {
 
   return (
     <MainLayout>
-      <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="space-y-8 animate-in fade-in duration-500 p-4">
         {/* TOP BAR */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
           <div>

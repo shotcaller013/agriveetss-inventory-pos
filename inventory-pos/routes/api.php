@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalesReportController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CreditController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -14,6 +16,8 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/sales/top', [DashboardController::class, 'data']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     // Protected routes go here
@@ -24,4 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/sales', [SalesController::class, 'storeSale']);
     Route::get('/reports/sales/daily', [SalesReportController::class, 'dailySales']);
+
+    Route::post('/credits', [CreditController::class, 'storeCredit']);
 });

@@ -24,7 +24,7 @@ export default function MainLayout({ children }) {
                 {/* Header stays at the top */}
                 <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-                <main className="flex-1 overflow-y-auto p-4 relative">
+                <main className="flex-1 overflow-y-auto relative">
                     {/* <div className="max-w-7xl mx-auto"> */}
                         {children}
                     {/* </div> */}

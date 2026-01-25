@@ -29,6 +29,7 @@ export default function CartPanel({
     0
   );
 
+
   const cashAmount = Number(cash) || 0;
   const change = cashAmount - total;
   const isInsufficient = cashAmount < total && cashAmount > 0;
@@ -142,11 +143,10 @@ export default function CartPanel({
               onChange={(e) => setCash(e.target.value)}
               placeholder="Amount Tendered"
               className={`w-full bg-white border-2 rounded-xl pl-7 pr-3 py-3 text-right text-xl font-mono font-bold transition-all outline-none
-                                ${
-                                  isInsufficient
-                                    ? "border-red-200 bg-red-50 text-red-600"
-                                    : "border-slate-100 focus:border-green-500"
-                                }`}
+                                ${isInsufficient
+                  ? "border-red-200 bg-red-50 text-red-600"
+                  : "border-slate-100 focus:border-green-500"
+                }`}
             />
           </div>
 
@@ -155,9 +155,8 @@ export default function CartPanel({
               Change Due
             </span>
             <span
-              className={`text-lg font-mono font-black ${
-                change < 0 ? "text-slate-300" : "text-green-600"
-              }`}
+              className={`text-lg font-mono font-black ${change < 0 ? "text-slate-300" : "text-green-600"
+                }`}
             >
               {Math.max(0, change)}
             </span>

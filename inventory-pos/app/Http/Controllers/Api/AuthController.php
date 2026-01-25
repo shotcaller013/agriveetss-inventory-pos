@@ -14,8 +14,8 @@ class AuthController extends Controller
             'name' => 'required',
             'password' => 'required',
         ]);
-      
-        
+
+
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Invalid credentials',
@@ -34,6 +34,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out']);
+        return response()->noContent();
     }
 }
