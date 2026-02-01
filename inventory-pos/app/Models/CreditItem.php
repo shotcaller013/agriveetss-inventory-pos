@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreditItem extends Model
 {
-    //
-    protected  $fillable =[
+    protected $fillable = [
         'credit_id',
         'product_id',
         'quantity',
         'unit_price',
-        'subtotal'
+        'subtotal',
     ];
 
     protected $casts = [
@@ -26,4 +25,9 @@ class CreditItem extends Model
         return $this->belongsTo(Credit::class);
     }
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }
+

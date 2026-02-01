@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BadgeDollarSign, Package, BarChart3, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, BadgeDollarSign, Package, BarChart3, Menu, X, LogOut , WalletCards } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Sales", to: "/sales", icon: BadgeDollarSign },
   { label: "Products", to: "/products", icon: Package },
   { label: "Sales Report", to: "/sales-report", icon: BarChart3 },
+  { label: "Credits", to: "/credits-tracker", icon: WalletCards  },
 ];
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }) {

@@ -9,20 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::table('sale_items', function (Blueprint $table) {
-            $table->decimal('cost_price', 10, 2)->after('unit_price');
+            if (!Schema::hasColumn('sale_items', 'cost_price')) {
+                $table->decimal('cost_price', 10, 2)->after('unit_price');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::table('sale_items', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('sale_items', 'cost_price')) {
+                $table->dropColumn('cost_price');
+            }
         });
     }
 };

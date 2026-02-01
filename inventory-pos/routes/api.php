@@ -30,4 +30,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/sales/daily', [SalesReportController::class, 'dailySales']);
 
     Route::post('/credits', [CreditController::class, 'storeCredit']);
+    Route::get('/credits', [CreditController::class, 'fetchCredits']);
 });

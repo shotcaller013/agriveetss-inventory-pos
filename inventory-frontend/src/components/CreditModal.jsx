@@ -7,6 +7,7 @@ export default function CreditModal({ open, onClose, onSave, items, credit }) {
     const [form, setForm] = useState({
         customer_name: "",
         due_date: "",
+        contact_number: "",
     });
 
     useEffect(() => {
@@ -15,6 +16,7 @@ export default function CreditModal({ open, onClose, onSave, items, credit }) {
             setForm({
                 customer_name: credit.customer_name ?? "",
                 due_date: credit.due_date ?? "",
+                contact_number: credit.contact_number ?? "",
             });
         } else {
             setForm({
@@ -75,6 +77,20 @@ export default function CreditModal({ open, onClose, onSave, items, credit }) {
                             onChange={handleChange}
                             className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter customer name"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Contact Number
+                        </label>
+                        <input
+                            type="number"
+                            name="contact_number"
+                            value={form.contact_number || ""}
+                            onChange={handleChange}
+                            className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter contact number"
                             required
                         />
                     </div>

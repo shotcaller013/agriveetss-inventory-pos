@@ -95,16 +95,16 @@ export default function Sales() {
 
 
     const handleCreditSave = async (data) => {
-        console.log("Credit Data:", data);
-        try{
+        try {
             setLoading(true);
-            const res = await api.post("/credits", data);
-            console.log("Credit Save Response:", res.data);
+            await api.post("/credits", data);
+            clearCart();            
+            setShowCredits(false);    
+            fetchProducts();       
             toast.success("Credit saved successfully");
-
-        }catch(err){
-            console.error(err);
-        }finally{
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Credit save failed");
+        } finally {
             setLoading(false);
         }
     };

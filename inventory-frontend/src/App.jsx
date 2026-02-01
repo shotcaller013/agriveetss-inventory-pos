@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Sales from "./pages/Sales";
 import Product from "./pages/Product";
 import SalesReport from "./pages/SalesReport";
+import CreditsTracker from "./pages/CreditsTracker";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -37,6 +38,11 @@ export default function App() {
                 <Route
                     path="/sales-report"
                     element={isAuth() ? <SalesReport /> : <Navigate to="/login" />}
+                />
+
+                <Route
+                    path="/credits-tracker"
+                    element={isAuth() ? <CreditsTracker /> : <Navigate to="/login" />}
                 />
 
                 {/* catch-all MUST be last */}

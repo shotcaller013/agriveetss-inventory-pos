@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('customer_name');
             $table->decimal('total_amount', 10, 2);
+            $table->string('contact_number')->nullable();
             $table->date('due_date');
             $table->timestamps();
         });

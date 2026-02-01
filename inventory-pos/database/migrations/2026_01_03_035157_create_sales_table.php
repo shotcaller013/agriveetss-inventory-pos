@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->decimal('cash_received', 10, 2);
             $table->decimal('change_given', 10, 2);
-            $table->string('reference')->nullable();  
+            $table->string('reference')->nullable();
             $table->timestamps();
         });
     }
@@ -32,7 +32,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('sales');
+        Schema::table('sales', function (Blueprint $table) {
+            $table->dropColumn('product_id');
+        });
         // drop product id 
-        
+
     }
 };

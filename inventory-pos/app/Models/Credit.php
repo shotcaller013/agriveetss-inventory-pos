@@ -11,7 +11,8 @@ class Credit extends Model
     protected $fillable = [
         'customer_name',
         'due_date',
-        'total_amount'
+        'total_amount',
+        'contact_number',
     ];
 
     protected $casts = [
