@@ -4,6 +4,7 @@ import api from "../api/axios";
 
 export default function Login() {
     const navigate = useNavigate();
+
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -18,9 +19,15 @@ export default function Login() {
             const { data } = await api.post("/login", { name, password });
 
             localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+
             api.defaults.headers.Authorization = `Bearer ${data.token}`;
 
-            navigate("/dashboard");
+            if (data.user.role === "cashier") {
+                navigate("/sales");
+            } else {
+                navigate("/sales-report");
+            }
         } catch (err) {
             setError(
                 err?.response?.data?.message || "Invalid name or password"
@@ -30,9 +37,7 @@ export default function Login() {
         }
     };
 
-
     return (
-
         <div className="min-h-screen flex items-center justify-center bg-slate-100">
             <form
                 onSubmit={submit}
