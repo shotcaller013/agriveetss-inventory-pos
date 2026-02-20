@@ -8,24 +8,42 @@ import CreditsTracker from "./pages/CreditsTracker";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+/* ================= HELPERS ================= */
+
 const getUser = () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
 };
 
-const isAuth = () => !!localStorage.getItem("token");
+const isAuth = () => {
+    return !!localStorage.getItem("token") && !!localStorage.getItem("user");
+};
+
+/* ================= PROTECTED ROUTE ================= */
 
 const ProtectedRoute = ({ children, allow }) => {
-    if (!isAuth()) return <Navigate to="/login" />;
-
+    const token = localStorage.getItem("token");
     const user = getUser();
 
-    if (allow && !allow.includes(user?.role)) {
-        return <Navigate to="/sales-report" />;
+    // ❌ not logged in
+    if (!token || !user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // ❌ role not allowed
+    if (allow && !allow.includes(user.role)) {
+        return (
+            <Navigate
+                to={user.role === "cashier" ? "/sales" : "/dashboard"}
+                replace
+            />
+        );
     }
 
     return children;
 };
+
+/* ================= APP ================= */
 
 export default function App() {
     return (
@@ -35,7 +53,7 @@ export default function App() {
             <Routes>
                 <Route path="/login" element={<Login />} />
 
-                {/* Admin only */}
+                {/* ADMIN ONLY */}
                 <Route
                     path="/dashboard"
                     element={
@@ -63,7 +81,7 @@ export default function App() {
                     }
                 />
 
-                {/* Admin + Cashier */}
+                {/* ADMIN + CASHIER */}
                 <Route
                     path="/sales"
                     element={
@@ -76,17 +94,21 @@ export default function App() {
                 <Route
                     path="/sales-report"
                     element={
-                        <ProtectedRoute allow={["cashier", "admin"]}>
+                        <ProtectedRoute allow={["admin", "cashier"]}>
                             <SalesReport />
                         </ProtectedRoute>
                     }
                 />
 
-                {/* catch-all */}
+                {/* CATCH-ALL (IMPORTANT FIX) */}
                 <Route
                     path="*"
                     element={
-                        <Navigate to={isAuth() ? "/sales-report" : "/login"} />
+                        isAuth()
+                            ? getUser()?.role === "cashier"
+                                ? <Navigate to="/sales" replace />
+                                : <Navigate to="/dashboard" replace />
+                            : <Navigate to="/login" replace />
                     }
                 />
             </Routes>

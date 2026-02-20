@@ -33,11 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:cashier'])->group(function () {
-
-
     // POS sales
     Route::post('/sales', [SalesController::class, 'storeSale']);
-
     // POS credit (CREATE ONLY)
     Route::post('/credits', [CreditController::class, 'storeCredit']);
 });
@@ -51,15 +48,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
     // Dashboard
     Route::get('/sales/top', [DashboardController::class, 'data']);
-
     Route::post('/products', [ProductController::class, 'storeProduct']);
     Route::put('/products/{id}', [ProductController::class, 'updateProduct']);
     Route::delete('/products/{id}', [ProductController::class, 'deleteProduct']);
 
-
     // Reports
     Route::get('/reports/sales/daily', [SalesReportController::class, 'dailySales']);
-
     // Credits (manage)
     Route::get('/credits', [CreditController::class, 'fetchCredits']);
     Route::post('/credits/{credit}/pay', [CreditController::class, 'processPayment']);

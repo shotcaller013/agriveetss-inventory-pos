@@ -1,16 +1,21 @@
 import { Menu, LogOut, ShieldCheck } from "lucide-react";
 import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Header({ onToggleSidebar }) {
+
+    const navigate = useNavigate();
+
     const logout = async () => {
         try {
             await api.post("/logout");
         } finally {
-            localStorage.removeItem("token");
-            delete api.defaults.headers.Authorization;
-            window.location.href = "/login";
+            localStorage.clear();
+            navigate("/login", { replace: true });
         }
     };
+
 
 
     return (

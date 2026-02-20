@@ -13,20 +13,20 @@ export default function Login() {
     const submit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
+        setError(""); //  CLEAR ERROR FIRST
 
         try {
             const { data } = await api.post("/login", { name, password });
 
+            //  STORE SESSION
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
-            api.defaults.headers.Authorization = `Bearer ${data.token}`;
-
-            if (data.user.role === "cashier") {
-                navigate("/sales");
+            //  REDIRECT BY ROLE
+            if (data.user.role === "admin") {
+                navigate("/sales-report", { replace: true });
             } else {
-                navigate("/sales-report");
+                navigate("/sales", { replace: true });
             }
         } catch (err) {
             setError(
