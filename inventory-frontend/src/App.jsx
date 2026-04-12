@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Sales from "./pages/Sales";
@@ -7,8 +8,6 @@ import SalesReport from "./pages/SalesReport";
 import CreditsTracker from "./pages/CreditsTracker";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-/* ================= HELPERS ================= */
 
 const getUser = () => {
     const user = localStorage.getItem("user");
@@ -19,18 +18,14 @@ const isAuth = () => {
     return !!localStorage.getItem("token") && !!localStorage.getItem("user");
 };
 
-/* ================= PROTECTED ROUTE ================= */
-
 const ProtectedRoute = ({ children, allow }) => {
     const token = localStorage.getItem("token");
     const user = getUser();
 
-    // ❌ not logged in
     if (!token || !user) {
         return <Navigate to="/login" replace />;
     }
 
-    // ❌ role not allowed
     if (allow && !allow.includes(user.role)) {
         return (
             <Navigate
@@ -43,22 +38,37 @@ const ProtectedRoute = ({ children, allow }) => {
     return children;
 };
 
-/* ================= APP ================= */
-
 export default function App() {
+    const [theme, setTheme] = useState(
+        localStorage.getItem("theme") || "light"
+    );
+
+    useEffect(() => {
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+
+        localStorage.setItem("theme", theme);
+    }, [theme]);
+
     return (
         <BrowserRouter>
-            <ToastContainer position="top-right" autoClose={3000} />
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                toastClassName="bg-white text-slate-900 dark:bg-gray-800 dark:text-white"
+            />
 
             <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<Login theme={theme} setTheme={setTheme} />} />
 
-                {/* ADMIN ONLY */}
                 <Route
                     path="/dashboard"
                     element={
                         <ProtectedRoute allow={["admin"]}>
-                            <Dashboard />
+                            <Dashboard theme={theme} setTheme={setTheme} />
                         </ProtectedRoute>
                     }
                 />
@@ -67,7 +77,7 @@ export default function App() {
                     path="/products"
                     element={
                         <ProtectedRoute allow={["admin"]}>
-                            <Product />
+                            <Product theme={theme} setTheme={setTheme} />
                         </ProtectedRoute>
                     }
                 />
@@ -76,17 +86,16 @@ export default function App() {
                     path="/credits-tracker"
                     element={
                         <ProtectedRoute allow={["admin"]}>
-                            <CreditsTracker />
+                            <CreditsTracker theme={theme} setTheme={setTheme} />
                         </ProtectedRoute>
                     }
                 />
 
-                {/* ADMIN + CASHIER */}
                 <Route
                     path="/sales"
                     element={
                         <ProtectedRoute allow={["admin", "cashier"]}>
-                            <Sales />
+                            <Sales theme={theme} setTheme={setTheme} />
                         </ProtectedRoute>
                     }
                 />
@@ -95,12 +104,11 @@ export default function App() {
                     path="/sales-report"
                     element={
                         <ProtectedRoute allow={["admin", "cashier"]}>
-                            <SalesReport />
+                            <SalesReport theme={theme} setTheme={setTheme} />
                         </ProtectedRoute>
                     }
                 />
 
-                {/* CATCH-ALL (IMPORTANT FIX) */}
                 <Route
                     path="*"
                     element={

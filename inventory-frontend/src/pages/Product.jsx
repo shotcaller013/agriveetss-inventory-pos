@@ -16,7 +16,7 @@ import {
   Filter,
 } from "lucide-react";
 
-export default function Product() {
+export default function Product({ theme, setTheme }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
@@ -84,18 +84,18 @@ export default function Product() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout theme={theme} setTheme={setTheme}>
       <div className="space-y-6 animate-in fade-in duration-500 p-4">
         {/* 1. TOP HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <h3 className="text-3xl font-extrabold text-slate-900 dark:text-slate-200 tracking-tight flex items-center gap-3">
               <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-200">
                 <Package size={24} />
               </div>
               Inventory Management
             </h3>
-            <p className="text-slate-500 mt-1 font-medium">
+            <p className="text-slate-500 dark:text-slate-400  mt-1 font-medium">
               Manage your products, pricing, and stock levels.
             </p>
           </div>
@@ -110,40 +110,45 @@ export default function Product() {
         </div>
 
         {/* 2. TOOLBAR (Search & Quick Stats) */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-4">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row items-center gap-4">
+
           <div className="relative w-full md:w-96">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
               size={18}
             />
+
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-700 outline-none transition-all"
               placeholder="Search by name, ID or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-2 text-slate-400 ml-auto">
+          <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 ml-auto">
             <Filter size={16} />
             <span className="text-xs font-bold uppercase tracking-widest">
               Sort: Newest First
             </span>
           </div>
+
         </div>
 
         {/* 3. PRODUCT TABLE */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-widest border-b border-slate-200">
+            <table className="min-w-full text-sm text-slate-900 dark:text-slate-100">
+
+              {/* HEADER */}
+              <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase text-[11px] font-bold tracking-widest border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="px-6 py-4 text-left">SKU/ID</th>
                   <th className="px-6 py-4 text-left">Product Name</th>
                   <th className="px-6 py-4 text-right">Cost</th>
                   <th className="px-6 py-4 text-center">Unit</th>
-                  <th className="px-6 py-4 text-right text-blue-600">
+                  <th className="px-6 py-4 text-right text-blue-600 dark:text-blue-400">
                     Selling Price
                   </th>
                   <th className="px-6 py-4 text-right">Stock Level</th>
@@ -151,13 +156,12 @@ export default function Product() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              {/* BODY */}
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+
                 {loading && products.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="7"
-                      className="px-6 py-20 text-center text-slate-400 font-medium"
-                    >
+                    <td colSpan="7" className="px-6 py-20 text-center text-slate-400 dark:text-slate-500 font-medium">
                       Syncing inventory...
                     </td>
                   </tr>
@@ -166,9 +170,7 @@ export default function Product() {
                     <td colSpan="7" className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center opacity-40">
                         <Package size={48} className="mb-2" />
-                        <p className="font-bold">
-                          No products found in your database.
-                        </p>
+                        <p className="font-bold">No products found in your database.</p>
                       </div>
                     </td>
                   </tr>
@@ -176,43 +178,42 @@ export default function Product() {
                   products.map((product) => (
                     <tr
                       key={product.id}
-                      className="hover:bg-slate-50/80 transition-colors group"
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800 transition-colors group"
                     >
-                      <td className="px-6 py-4 text-slate-400 font-mono text-xs">
+                      {/* ID */}
+                      <td className="px-6 py-4 text-slate-400 dark:text-slate-500 font-mono text-xs">
                         #{product.id}
                       </td>
 
-                      <td className="px-6 py-4 font-bold text-slate-800">
+                      {/* NAME */}
+                      <td className="px-6 py-4 font-bold text-slate-800 dark:text-white">
                         {product.name}
                       </td>
 
-                      <td className="px-6 py-4 text-right text-slate-500 font-medium">
-                        ₱
-                        {Number(product.cost_price).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
+                      {/* COST */}
+                      <td className="px-6 py-4 text-right text-slate-500 dark:text-slate-400 font-medium">
+                        ₱{Number(product.cost_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
 
+                      {/* UNIT */}
                       <td className="px-6 py-4 text-center">
-                        <span className="px-2.5 py-1 text-[10px] font-black bg-slate-100 text-slate-600 rounded-md uppercase tracking-tighter">
+                        <span className="px-2.5 py-1 text-[10px] font-black bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md uppercase tracking-tighter">
                           {product.unit_type}
                         </span>
                       </td>
 
-                      <td className="px-6 py-4 text-right font-black text-slate-900 text-base">
-                        ₱
-                        {Number(product.selling_price).toLocaleString(
-                          undefined,
-                          { minimumFractionDigits: 2 }
-                        )}
+                      {/* SELLING PRICE */}
+                      <td className="px-6 py-4 text-right font-black text-slate-900 dark:text-white text-base">
+                        ₱{Number(product.selling_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
 
+                      {/* STOCK */}
                       <td className="px-6 py-4 text-right">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
-                                                    ${product.stock_qty <= 5
-                              ? "bg-red-50 text-red-600 border border-red-100"
-                              : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                  ${product.stock_qty <= 5
+                              ? "bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+                              : "bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30"
                             }`}
                         >
                           {product.stock_qty <= 5 && <AlertCircle size={12} />}
@@ -220,15 +221,16 @@ export default function Product() {
                         </span>
                       </td>
 
+                      {/* ACTIONS */}
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
                           <button
                             onClick={() => {
                               setEditProduct(product);
                               setOpen(true);
-
                             }}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title="Edit Product"
                           >
                             <Pencil size={18} />
@@ -239,44 +241,48 @@ export default function Product() {
                               setDeleteId(product.id);
                               setConfirmOpen(true);
                             }}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Delete Product"
                           >
                             <Trash2 size={18} />
                           </button>
+
                         </div>
                       </td>
                     </tr>
                   ))
                 )}
+
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* 4. PAGINATION */}
-        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        {/* PAGINATION */}
+        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 mt-4">
+
           <button
             disabled={!prevCursor || loading}
             onClick={() => fetchProducts(prevCursor)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-30 transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-30 transition-all shadow-sm"
           >
             <ChevronLeft size={18} />
             Previous
           </button>
 
-          <div className="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="hidden md:block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             Showing {products.length} Products
           </div>
 
           <button
             disabled={!nextCursor || loading}
             onClick={() => fetchProducts(nextCursor)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 disabled:opacity-30 transition-all shadow-md shadow-slate-200"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-slate-900 dark:bg-slate-700 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-30 transition-all shadow-md shadow-slate-200 dark:shadow-none"
           >
             Next Page
             <ChevronRight size={18} />
           </button>
+
         </div>
       </div>
 
