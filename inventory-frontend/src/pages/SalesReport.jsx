@@ -1,20 +1,11 @@
 import MainLayout from "../layout/MainLayout";
 import {
-  BarChart3,
-  Calendar,
-  ReceiptText,
-  Package,
-  Download,
-  TrendingUp,
-  DollarSign,
-  ArrowUpRight,
-  Filter,
-  Wallet, // Added for Collections
+  BarChart3, Calendar, ReceiptText, Package, Download, TrendingUp, DollarSign, ArrowUpRight, Filter, Wallet, // Added for Collections
 } from "lucide-react";
 import api from "../api/axios";
 import { useState, useEffect } from "react";
 
-export default function SalesReport({ theme, setTheme }) {
+export default function SalesReport() {
   const today = new Date().toISOString().slice(0, 10);
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
@@ -116,7 +107,7 @@ export default function SalesReport({ theme, setTheme }) {
   }, []);
 
   return (
-    <MainLayout theme={theme} setTheme={setTheme}>
+    <MainLayout>
       <div className="space-y-8 animate-in fade-in duration-500 p-4">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">

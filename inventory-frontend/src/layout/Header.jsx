@@ -1,11 +1,9 @@
-import { Menu, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
 
-
-export default function Header({ onToggleSidebar, theme, setTheme }) {
-
+export default function Header({ onToggleSidebar }) {
     const navigate = useNavigate();
 
     const logout = async () => {
@@ -17,31 +15,19 @@ export default function Header({ onToggleSidebar, theme, setTheme }) {
         }
     };
 
-
-
     return (
         <header className="h-16 bg-gray border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 z-20">
             <div className="flex items-center gap-4">
-                {/* Hamburger Button - Hidden on Desktop (lg) */}
                 <button
                     onClick={onToggleSidebar}
                     className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
                 >
                     <Menu size={24} />
                 </button>
-
-                <div className="flex items-center gap-2">
-                    {/* <div className="bg-blue-600 p-1.5 rounded-lg text-white">
-                        <ShieldCheck size={20} />
-                    </div>
-                    <span className="font-bold text-slate-800 hidden sm:block tracking-tight">
-                        Inventory<span className="text-blue-600">System</span>
-                    </span> */}
-                </div>
             </div>
 
             <div className="flex items-center gap-3">
-                <ThemeToggle theme={theme} setTheme={setTheme} />
+                <ThemeToggle />
 
                 <button
                     onClick={logout}

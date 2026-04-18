@@ -8,6 +8,7 @@ import SalesReport from "./pages/SalesReport";
 import CreditsTracker from "./pages/CreditsTracker";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const getUser = () => {
     const user = localStorage.getItem("user");
@@ -39,87 +40,76 @@ const ProtectedRoute = ({ children, allow }) => {
 };
 
 export default function App() {
-    const [theme, setTheme] = useState(
-        localStorage.getItem("theme") || "light"
-    );
-
-    useEffect(() => {
-        if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-
-        localStorage.setItem("theme", theme);
-    }, [theme]);
-
+ 
     return (
-        <BrowserRouter>
-            <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                toastClassName="bg-white text-slate-900 dark:bg-gray-800 dark:text-white"
-            />
-
-            <Routes>
-                <Route path="/login" element={<Login theme={theme} setTheme={setTheme} />} />
-
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute allow={["admin"]}>
-                            <Dashboard theme={theme} setTheme={setTheme} />
-                        </ProtectedRoute>
-                    }
+        <ThemeProvider>
+            <BrowserRouter>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    toastClassName="bg-white text-slate-900 dark:bg-gray-800 dark:text-white"
                 />
 
-                <Route
-                    path="/products"
-                    element={
-                        <ProtectedRoute allow={["admin"]}>
-                            <Product theme={theme} setTheme={setTheme} />
-                        </ProtectedRoute>
-                    }
-                />
+                <Routes>
+                    <Route path="/login" element={<Login />} />
 
-                <Route
-                    path="/credits-tracker"
-                    element={
-                        <ProtectedRoute allow={["admin"]}>
-                            <CreditsTracker theme={theme} setTheme={setTheme} />
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <ProtectedRoute allow={["admin"]}>
+                                <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/sales"
-                    element={
-                        <ProtectedRoute allow={["admin", "cashier"]}>
-                            <Sales theme={theme} setTheme={setTheme} />
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/products"
+                        element={
+                            <ProtectedRoute allow={["admin"]}>
+                                <Product />
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/sales-report"
-                    element={
-                        <ProtectedRoute allow={["admin", "cashier"]}>
-                            <SalesReport theme={theme} setTheme={setTheme} />
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/credits-tracker"
+                        element={
+                            <ProtectedRoute allow={["admin"]}>
+                                <CreditsTracker />
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="*"
-                    element={
-                        isAuth()
-                            ? getUser()?.role === "cashier"
-                                ? <Navigate to="/sales" replace />
-                                : <Navigate to="/dashboard" replace />
-                            : <Navigate to="/login" replace />
-                    }
-                />
-            </Routes>
-        </BrowserRouter>
+                    <Route
+                        path="/sales"
+                        element={
+                            <ProtectedRoute allow={["admin", "cashier"]}>
+                                <Sales />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/sales-report"
+                        element={
+                            <ProtectedRoute allow={["admin", "cashier"]}>
+                                <SalesReport/>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="*"
+                        element={
+                            isAuth()
+                                ? getUser()?.role === "cashier"
+                                    ? <Navigate to="/sales" replace />
+                                    : <Navigate to="/dashboard" replace />
+                                : <Navigate to="/login" replace />
+                        }
+                    />
+                </Routes>
+            </BrowserRouter>
+        </ThemeProvider>
     );
 }

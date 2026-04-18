@@ -1,14 +1,7 @@
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import {
-  BadgeDollarSign,
-  Package,
-  BarChart3,
-  Menu,
-  X,
-  WalletCards,
-  LogOut,
-} from "lucide-react";
+import { BadgeDollarSign, Package, BarChart3, Menu, X, WalletCards } from "lucide-react";
 import api from "../api/axios";
+import { useState, useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Sales", to: "/sales", icon: BadgeDollarSign, roles: ["admin", "cashier"] },
@@ -20,6 +13,20 @@ const NAV_ITEMS = [
 export default function Sidebar({ isCollapsed, setIsCollapsed }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+  const [counter, setCounter] = useState(0);
+
+  const creditCounter = async () => {
+    try {
+      const res = await api.get("/credits");
+      setCounter(res.data.overdueCount || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    creditCounter();
+  }, []);
 
   const logout = async () => {
     try {
@@ -32,14 +39,15 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
 
   return (
     <aside
-      className={`h-screen sticky top-0 bg-slate-950 flex flex-col border-r border-slate-900 transition-all duration-300 ease-in-out shrink-0 z-50 ${isCollapsed ? "w-20" : "w-64"
+      className={`h-screen sticky top-0 bg-slate-950 flex flex-col border-r border-slate-900 transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"
         }`}
     >
-      <div className="p-4 flex items-center min-h-[72px] border-b border-slate-900/50">
+      {/* Header */}
+      <div className="p-4 flex items-center border-b border-slate-900/50">
         {!isCollapsed && (
           <Link
             to="/sales-report"
-            className="text-lg font-bold text-white tracking-tight flex-1 hover:text-blue-400 transition"
+            className="text-lg font-bold text-white flex-1 hover:text-blue-400"
           >
             Inventory System
           </Link>
@@ -47,68 +55,49 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }) {
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition-all ${isCollapsed ? "mx-auto" : "ml-auto"
+          className={`p-2 text-slate-400 hover:text-white ${isCollapsed ? "mx-auto" : "ml-auto"
             }`}
         >
           {isCollapsed ? <Menu size={22} /> : <X size={22} />}
         </button>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1.5 mt-6">
+      {/* Nav */}
+      <nav className="flex-1 px-3 mt-6 space-y-1.5">
         {NAV_ITEMS.filter((item) => item.roles.includes(user?.role)).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${isActive
+              `flex items-center justify-between px-3 py-3 rounded-xl ${isActive
                 ? "bg-blue-600/10 text-blue-500"
-                : "text-slate-500 hover:bg-slate-900 hover:text-slate-100"
+                : "text-slate-500 hover:bg-slate-900 hover:text-white"
               }`
             }
           >
-            <item.icon size={20} className="shrink-0" />
+            <div className="flex items-center gap-3">
+              <item.icon size={20} />
+              {!isCollapsed && (
+                <span className="text-sm font-semibold">{item.label}</span>
+              )}
+            </div>
 
-            {!isCollapsed && (
-              <span className="font-semibold text-sm tracking-wide">
-                {item.label}
-              </span>
-            )}
+            {!isCollapsed &&
+              item.to === "/credits-tracker" &&
+              counter > 0 && (
+                <span className="relative flex h-5 min-w-[20px] items-center justify-center">
 
-            {isCollapsed && (
-              <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all shadow-xl border border-slate-800 z-[60] whitespace-nowrap">
-                {item.label}
-              </div>
-            )}
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
+
+                  <span className="relative bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {counter}
+                  </span>
+
+                </span>
+              )}
           </NavLink>
         ))}
       </nav>
-
-      {/* <div className="p-3 border-t border-slate-900/50">
-        {!isCollapsed && user && (
-          <div className="mb-3 px-3">
-            <p className="text-sm font-semibold text-white capitalize">
-              {user.role}
-            </p>
-          </div>
-        )}
-
-        <button
-          onClick={logout}
-          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-all group relative"
-        >
-          <LogOut size={20} className="shrink-0" />
-
-          {!isCollapsed && (
-            <span className="font-semibold text-sm tracking-wide">Logout</span>
-          )}
-
-          {isCollapsed && (
-            <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all shadow-xl border border-slate-800 z-[60] whitespace-nowrap">
-              Logout
-            </div>
-          )}
-        </button>
-      </div> */}
     </aside>
   );
 }

@@ -20,6 +20,7 @@ export default function Product({ theme, setTheme }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
+  console.log('products test',products );
   const [nextCursor, setNextCursor] = useState(null);
   const [prevCursor, setPrevCursor] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -52,17 +53,30 @@ export default function Product({ theme, setTheme }) {
 
   const handleSave = async (data) => {
     try {
+      const config = {
+        headers: { "Content-Type": "multipart/form-data" },
+      };
+
       if (editProduct) {
-        const res = await api.put(`/products/${editProduct.id}`, data);
+        const res = await api.post(
+          `/products/${editProduct.id}?_method=PUT`,
+          data,
+          config
+        );
+
         setProducts((prev) =>
           prev.map((p) => (p.id === editProduct.id ? res.data.product : p))
         );
+
         toast.success("Product updated");
       } else {
-        const res = await api.post("/products", data);
+        const res = await api.post("/products", data, config);
+
         setProducts((prev) => [res.data.product, ...prev]);
+
         toast.success("Product added successfully");
       }
+
       setEditProduct(null);
       setOpen(false);
     } catch {
@@ -152,6 +166,7 @@ export default function Product({ theme, setTheme }) {
                     Selling Price
                   </th>
                   <th className="px-6 py-4 text-right">Stock Level</th>
+                  <th className="px-6 py-4 text-right">Image</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -175,14 +190,14 @@ export default function Product({ theme, setTheme }) {
                     </td>
                   </tr>
                 ) : (
-                  products.map((product) => (
+                  products.map((product, index) => (
                     <tr
                       key={product.id}
                       className="hover:bg-slate-50/80 dark:hover:bg-slate-800 transition-colors group"
                     >
                       {/* ID */}
                       <td className="px-6 py-4 text-slate-400 dark:text-slate-500 font-mono text-xs">
-                        #{product.id}
+                        #{index + 1}
                       </td>
 
                       {/* NAME */}
@@ -219,6 +234,13 @@ export default function Product({ theme, setTheme }) {
                           {product.stock_qty <= 5 && <AlertCircle size={12} />}
                           {product.stock_qty} {product.unit_type}
                         </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <img
+                          src={`http://localhost:8000/storage/${product.image}`}
+                          className="w-12 h-12 rounded object-cover mx-auto"
+                        />
                       </td>
 
                       {/* ACTIONS */}

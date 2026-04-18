@@ -13,7 +13,7 @@ import {
     X
 } from "lucide-react";
 
-export default function CreditsTracker() {
+export default function CreditsTracker({ theme, setTheme }) {
     const [credits, setCredits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +24,17 @@ export default function CreditsTracker() {
 
     const [paidAmount, setPaidAmount] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState("cash");
+
+    const getDueState = (credit) => {
+        const today = new Date();
+        const due = new Date(credit.due_date);
+
+        if (credit.status === "paid") return "paid";
+        if (due.toDateString() === today.toDateString()) return "due_today";
+        if (due < today) return "overdue";
+
+        return "upcoming";
+    };
 
     const fetchCredits = async () => {
         setLoading(true);
@@ -45,6 +56,9 @@ export default function CreditsTracker() {
     const filteredCredits = credits.filter(c =>
         c.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+
+
 
     const handlePayment = async () => {
         if (!paymentModal || paidAmount <= 0) return;
@@ -69,10 +83,10 @@ export default function CreditsTracker() {
     };
 
     return (
-        <MainLayout>
-            <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
+        <MainLayout theme={theme} setTheme={setTheme}>
+            <div className="p-4 md:p-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
                 {/* Header Section */}
-                <div className="max-w-6xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="max-w-6xl mx-auto bg-white dark:bg-slate-800 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
                             <CircleDollarSign className="text-indigo-600" />
@@ -86,7 +100,7 @@ export default function CreditsTracker() {
                         <input
                             type="text"
                             placeholder="Search customer..."
-                            className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-64 transition-all"
+                            className="pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-64 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -94,65 +108,97 @@ export default function CreditsTracker() {
                 </div>
 
                 {/* Table Card */}
-                <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                <tr className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300">
                                     <th className="px-6 py-4 text-left font-semibold">Customer</th>
                                     <th className="px-6 py-4 text-left font-semibold">Total Debt</th>
                                     <th className="px-6 py-4 text-left font-semibold">Remaining</th>
                                     <th className="px-6 py-4 text-center font-semibold">Contact Number</th>
+                                    <th className="px-6 py-4 text-center font-semibold">Due Date</th>
                                     <th className="px-6 py-4 text-center font-semibold">Actions</th>
                                     <th className="px-6 py-4 text-right font-semibold">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                                 {loading ? (
-                                    <tr><td colSpan="5" className="py-12 text-center text-slate-400">Loading records...</td></tr>
+                                    <tr>
+                                        <td colSpan="5" className="py-12 text-center text-slate-400 dark:text-slate-500">
+                                            Loading records...
+                                        </td>
+                                    </tr>
                                 ) : filteredCredits.length === 0 ? (
-                                    <tr><td colSpan="5" className="py-12 text-center text-slate-400">No records found.</td></tr>
+                                    <tr>
+                                        <td colSpan="5" className="py-12 text-center text-slate-400 dark:text-slate-500">
+                                            No records found.
+                                        </td>
+                                    </tr>
                                 ) : (
                                     filteredCredits.map((credit) => (
-                                        <tr key={credit.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <tr
+                                            key={credit.id}
+                                            className={`
+        transition-colors
+        hover:bg-slate-50/50 dark:hover:bg-slate-700/50
+        
+        ${getDueState(credit) === "overdue" ? "bg-red-50 dark:bg-red-900/20" : ""}
+        ${getDueState(credit) === "due_today" ? "bg-yellow-50 dark:bg-yellow-900/20" : ""}
+    `}
+                                        >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
                                                         {credit.customer_name.charAt(0)}
                                                     </div>
-                                                    <span className="font-semibold text-slate-700">{credit.customer_name}</span>
+                                                    <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                                        {credit.customer_name}
+                                                    </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600">
+
+                                            <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
                                                 ₱{Math.max(0, credit.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                             </td>
 
                                             <td className="px-6 py-4">
-                                                <span className="font-bold text-slate-900 text-base">
+                                                <span className="font-bold text-slate-900 dark:text-white text-base">
                                                     ₱{Math.max(0, credit.remaining_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </span>
                                             </td>
+
                                             <td className="px-6 py-4 text-center">
-                                                {credit.contact_number || <span className="text-slate-400 italic">N/A</span>}
+                                                {credit.contact_number || (
+                                                    <span className="text-slate-400 dark:text-slate-500 italic">N/A</span>
+                                                )}
                                             </td>
+                                            <td className="px-6 py-4 text-center">
+                                                {credit.due_date || (
+                                                    <span className="text-slate-400 dark:text-slate-500 italic">N/A</span>
+                                                )}
+                                            </td>
+
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <button
                                                         onClick={() => setDetailsModal(credit)}
-                                                        className="p-2 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors group"
+                                                        className="p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-lg transition-colors"
                                                         title="View Items"
                                                     >
                                                         <ReceiptText size={18} />
                                                     </button>
+
                                                     <button
                                                         onClick={() => setHistoryModal(credit)}
-                                                        className="p-2 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors"
+                                                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors"
                                                         title="Payment History"
                                                     >
                                                         <History size={18} />
                                                     </button>
                                                 </div>
                                             </td>
+
                                             <td className="px-6 py-4 text-right">
                                                 <StatusBadge
                                                     status={credit.status}
@@ -173,18 +219,30 @@ export default function CreditsTracker() {
                 <Modal title="Items Owed" icon={<ReceiptText className="text-indigo-600" />} onClose={() => setDetailsModal(null)}>
                     <div className="space-y-3">
                         {detailsModal.items.map((item, i) => (
-                            <div key={i} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div
+                                key={i}
+                                className="flex justify-between items-center p-3 bg-white dark:bg-slate-700 rounded-lg border border-slate-100 dark:border-slate-600"
+                            >
                                 <div>
-                                    <p className="font-semibold text-slate-800">{item.product_name}</p>
-                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <p className="font-semibold text-slate-800 dark:text-white">
+                                        {item.product_name}
+                                    </p>
+
+                                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
                                         <span>{item.quantity} units</span>
                                         <span>•</span>
-                                        <span>₱{Number(item.unit_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} each</span>
+                                        <span>
+                                            ₱{Number(item.unit_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} each
+                                        </span>
                                     </div>
                                 </div>
+
                                 <div className="text-right">
-                                    <p className="text-[10px] font-bold uppercase text-slate-400 leading-none mb-1">Subtotal</p>
-                                    <span className="font-bold text-slate-900">
+                                    <p className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 leading-none mb-1">
+                                        Subtotal
+                                    </p>
+
+                                    <span className="font-bold text-slate-900 dark:text-white">
                                         ₱{Number(item.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </span>
                                 </div>
@@ -195,24 +253,38 @@ export default function CreditsTracker() {
             )}
 
             {historyModal && (
-                <Modal title="Payment History" icon={<History className="text-amber-600" />} onClose={() => setHistoryModal(null)}>
+                <Modal
+                    title="Payment History"
+                    icon={<History className="text-amber-600 dark:text-amber-400" />}
+                    onClose={() => setHistoryModal(null)}
+                >
                     <div className="space-y-2">
                         {historyModal.payments?.length ? (
                             historyModal.payments.map((p, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 border-l-4 border-emerald-400 bg-white shadow-sm rounded-r-lg">
+                                <div
+                                    key={i}
+                                    className="flex justify-between items-center p-3 border-l-4 border-emerald-400 bg-white dark:bg-slate-700 shadow-sm rounded-r-lg"
+                                >
                                     <div>
-                                        <p className="text-sm font-bold text-slate-800">₱{p.amount_paid}</p>
-                                        <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                                        <p className="text-sm font-bold text-slate-800 dark:text-white">
+                                            ₱{p.amount_paid}
+                                        </p>
+
+                                        <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">
                                             {new Date(p.paid_at).toLocaleString()}
                                         </p>
                                     </div>
 
-                                    <span className="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500 font-bold uppercase">{p.payment_method || 'cash'}</span>
+                                    <span className="text-[10px] bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded text-slate-500 dark:text-slate-200 font-bold uppercase">
+                                        {p.payment_method || 'cash'}
+                                    </span>
                                 </div>
                             ))
                         ) : (
                             <div className="text-center py-8">
-                                <p className="text-sm text-slate-400 italic">No payments recorded yet</p>
+                                <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+                                    No payments recorded yet
+                                </p>
                             </div>
                         )}
                     </div>
@@ -220,34 +292,64 @@ export default function CreditsTracker() {
             )}
 
             {paymentModal && (
-                <Modal title="Process Payment" icon={<Wallet className="text-emerald-600" />} onClose={() => setPaymentModal(null)}>
+                <Modal
+                    title="Process Payment"
+                    icon={<Wallet className="text-emerald-600" />}
+                    onClose={() => setPaymentModal(null)}
+                >
                     <div className="space-y-4">
-                        <div className="p-4 bg-emerald-50 rounded-xl mb-4 text-center">
-                            <p className="text-xs text-emerald-700 font-bold uppercase tracking-widest">Balance Due</p>
-                            <p className="text-3xl font-black text-emerald-800">₱{paymentModal.remaining_balance}</p>
+
+                        {/* BALANCE */}
+                        <div className="p-4 rounded-xl text-center 
+                bg-emerald-50 dark:bg-emerald-900/30">
+
+                            <p className="text-xs font-bold uppercase tracking-widest 
+                    text-emerald-700 dark:text-emerald-400">
+                                Balance Due
+                            </p>
+
+                            <p className="text-3xl font-black 
+                    text-emerald-800 dark:text-emerald-300">
+                                ₱{paymentModal.remaining_balance}
+                            </p>
                         </div>
 
+                        {/* AMOUNT */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Payment Amount</label>
+                            <label className="block text-xs font-bold uppercase mb-1 ml-1 
+                    text-slate-500 dark:text-slate-400">
+                                Payment Amount
+                            </label>
+
                             <input
                                 type="number"
-                                className="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none font-bold text-lg transition-all"
                                 placeholder="0.00"
                                 autoFocus
                                 onChange={(e) => setPaidAmount(Number(e.target.value))}
+                                className="w-full p-3 rounded-xl text-lg font-bold outline-none transition-all
+                        bg-white dark:bg-slate-800
+                        text-slate-900 dark:text-white
+                        border-2 border-slate-200 dark:border-slate-700
+                        focus:border-indigo-500"
                             />
                         </div>
 
+                        {/* METHOD */}
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Method</label>
+                            <label className="block text-xs font-bold uppercase mb-1 ml-1 
+                    text-slate-500 dark:text-slate-400">
+                                Method
+                            </label>
+
                             <div className="grid grid-cols-2 gap-2">
-                                {['cash', 'gcash'].map((m) => (
+                                {["cash", "E-Wallet"].map((m) => (
                                     <button
                                         key={m}
                                         onClick={() => setPaymentMethod(m)}
-                                        className={`py-3 rounded-xl border-2 font-bold capitalize transition-all ${paymentMethod === m
-                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                                            : 'border-slate-100 text-slate-400 hover:bg-slate-50'
+                                        className={`py-3 rounded-xl border-2 font-bold capitalize transition-all
+                                ${paymentMethod === m
+                                                ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                                                : "border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                                             }`}
                                     >
                                         {m}
@@ -256,9 +358,12 @@ export default function CreditsTracker() {
                             </div>
                         </div>
 
+                        {/* SUBMIT */}
                         <button
                             onClick={handlePayment}
-                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] mt-4"
+                            className="w-full py-4 rounded-xl font-bold transition-all active:scale-[0.98]
+                    bg-indigo-600 hover:bg-indigo-700 text-white
+                    shadow-lg shadow-indigo-200 dark:shadow-none"
                         >
                             Confirm Payment
                         </button>
@@ -273,9 +378,9 @@ export default function CreditsTracker() {
 
 function StatusBadge({ status, onClick }) {
     const styles = {
-        open: "bg-slate-100 text-slate-600 hover:bg-slate-200",
-        partial: "bg-amber-100 text-amber-700 hover:bg-amber-200",
-        paid: "bg-emerald-100 text-emerald-700 cursor-default"
+        open: "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
+        partial: "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60",
+        paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 cursor-default"
     };
 
     return (
@@ -284,8 +389,14 @@ function StatusBadge({ status, onClick }) {
             onClick={onClick}
             className={`px-3 py-1.5 text-[11px] font-black rounded-full uppercase tracking-tighter transition-all flex items-center gap-1 ml-auto ${styles[status]}`}
         >
-            <span className={`w-1.5 h-1.5 rounded-full ${status === 'paid' ? 'bg-emerald-500' : status === 'partial' ? 'bg-amber-500' : 'bg-slate-400'
-                }`} />
+            <span
+                className={`w-1.5 h-1.5 rounded-full ${status === 'paid'
+                    ? 'bg-emerald-500'
+                    : status === 'partial'
+                        ? 'bg-amber-500'
+                        : 'bg-slate-400 dark:bg-slate-300'
+                    }`}
+            />
             {status}
             {status !== 'paid' && <ChevronRight size={12} />}
         </button>
@@ -295,17 +406,27 @@ function StatusBadge({ status, onClick }) {
 function Modal({ title, icon, children, onClose }) {
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="flex justify-between items-center p-6 border-b border-slate-100">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+
+                <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-50 rounded-lg">{icon}</div>
-                        <h3 className="font-bold text-slate-800 text-lg">{title}</h3>
+                        <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            {icon}
+                        </div>
+                        <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                            {title}
+                        </h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                        <X size={20} className="text-slate-400" />
+
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                    >
+                        <X size={20} className="text-slate-400 dark:text-slate-300" />
                     </button>
                 </div>
-                <div className="p-6">
+
+                <div className="p-6 text-slate-700 dark:text-slate-200">
                     {children}
                 </div>
             </div>

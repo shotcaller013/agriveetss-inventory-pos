@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import ConfirmDialog from "../ConfirmDialog";
 import {
-  Trash2,
   ShoppingCart,
-  Banknote,
   RotateCcw,
-  CreditCard,
 } from "lucide-react";
 
 const formatPrice = (amount) =>
@@ -20,6 +17,7 @@ export default function CartPanel({
   onCheckout,
   onClearCart,
   loading = false,
+
 }) {
   const [cash, setCash] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -28,7 +26,6 @@ export default function CartPanel({
     (sum, item) => sum + item.quantity * item.unit_price,
     0
   );
-
 
   const cashAmount = Number(cash) || 0;
   const change = cashAmount - total;
@@ -40,18 +37,19 @@ export default function CartPanel({
   }, [cart.length]);
 
   return (
-    <div className="bg-white flex flex-col h-full min-h-0 border-t md:border-t-0">
+    <div className="flex flex-col  bg-white dark:bg-slate-900">
+
       {/* HEADER */}
-      <div className="p-4 flex items-center justify-between border-b bg-slate-50/30">
+      <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-slate-900 rounded-lg text-white">
+          <div className="p-2 bg-slate-900 text-white rounded-lg">
             <ShoppingCart size={16} />
           </div>
           <div>
-            <h2 className="text-xs font-black tracking-widest uppercase text-slate-500">
+            <h2 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
               Current Order
             </h2>
-            <p className="text-[10px] font-bold text-blue-600 uppercase">
+            <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">
               {cart.reduce((a, b) => a + b.quantity, 0)} Units
             </p>
           </div>
@@ -60,22 +58,19 @@ export default function CartPanel({
         {cart.length > 0 && (
           <button
             onClick={() => setConfirmOpen(true)}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-            title="Clear Cart"
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
           >
             <RotateCcw size={18} />
           </button>
         )}
       </div>
 
-      {/* CART ITEMS (SCROLLABLE) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 min-h-0">
+      {/* ITEMS */}
+      <div className="p-4 space-y-3 custom-scrollbar max-h-[300px] overflow-y-auto">
         {cart.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-300">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <ShoppingCart size={32} />
-            </div>
-            <p className="text-sm font-bold uppercase tracking-widest">
+          <div className="h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
+            <ShoppingCart size={32} />
+            <p className="text-sm font-bold uppercase mt-2">
               Cart is empty
             </p>
           </div>
@@ -83,123 +78,131 @@ export default function CartPanel({
           cart.map((item) => (
             <div
               key={item.product_id}
-              className="flex items-center gap-4 p-3 bg-white rounded-2xl border shadow-sm"
+              className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
             >
+
+              {/* IMAGE */}
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0">
+                <img
+                  src={`http://localhost:8000/storage/${item.image}`}
+                  alt={item.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://placehold.co/100x100?text=No';
+                  }}
+                />
+              </div>
+
+              {/* INFO */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-black text-slate-800 truncate">
+                <p className="text-sm font-black text-slate-800 dark:text-white truncate">
                   {item.name}
                 </p>
-                <p className="text-[10px] font-bold text-slate-400">
-                  {formatPrice(item.unit_price)} / unit
+                <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                  {formatPrice(item.unit_price)}
                 </p>
               </div>
 
               {/* QTY */}
-              <div className="flex items-center bg-slate-100 rounded-xl p-1 border">
+              <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                 <button
                   onClick={() => updateQty(item.product_id, -1)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:text-red-500"
+                  className="w-7 h-7 flex items-center justify-center hover:text-red-500"
                 >
                   −
                 </button>
-                <span className="w-8 text-center text-xs font-black">
+                <span className="w-8 text-center text-xs font-black text-slate-800 dark:text-white">
                   {item.quantity}
                 </span>
                 <button
                   onClick={() => updateQty(item.product_id, 1)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:text-blue-600"
+                  className="w-7 h-7 flex items-center justify-center hover:text-blue-500"
                 >
                   +
                 </button>
               </div>
 
-              <div className="w-20 text-right text-sm font-black">
+              {/* TOTAL */}
+              <div className="w-20 text-right font-bold text-slate-900 dark:text-white">
                 {formatPrice(item.quantity * item.unit_price)}
               </div>
+
             </div>
           ))
         )}
       </div>
 
-      {/* SUMMARY (ALWAYS VISIBLE) */}
-      <div className="mt-4 pt-4 border-t border-slate-200 bg-slate-50 -mx-4 px-4 pb-0 rounded-b-2xl">
-        <div className="space-y-3 mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">
-              Total Payable
-            </span>
-            <span className="text-3xl font-black text-slate-900 tracking-tighter">
-              {formatPrice(total)}
-            </span>
+      {/* SUMMARY */}
+      <div className="sticky bottom-0 p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+        <div className="space-y-4">
+
+          {/* TOTAL & CHANGE ROW */}
+          <div className="flex flex-col gap-1">
+            <div className="flex justify-between items-baseline">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                Payable
+              </span>
+              <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
+                {formatPrice(total)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center h-8">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                Change Due
+              </span>
+              <span className={`font-mono text-lg font-bold transition-colors ${change > 0 ? "text-emerald-500" : "text-slate-300 dark:text-slate-700"
+                }`}>
+                ₱{Math.max(0, change).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
           </div>
 
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
-              ₱
-            </span>
+          {/* MINIMAL CASH INPUT */}
+          <div className="relative group">
             <input
               type="number"
               value={cash}
               onChange={(e) => setCash(e.target.value)}
-              placeholder="Amount Tendered"
-              className={`w-full bg-white border-2 rounded-xl pl-7 pr-3 py-3 text-right text-xl font-mono font-bold transition-all outline-none
-                                ${isInsufficient
-                  ? "border-red-200 bg-red-50 text-red-600"
-                  : "border-slate-100 focus:border-green-500"
+              placeholder="0.00"
+              className={`w-full py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-center text-2xl font-black transition-all outline-none border-2
+                    ${isInsufficient
+                  ? "border-red-100 dark:border-red-900/20 text-red-500"
+                  : "border-transparent focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-slate-100 dark:focus:ring-slate-800/50 text-slate-900 dark:text-white"
                 }`}
             />
+            {!cash && (
+              <span className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 pointer-events-none text-sm font-bold uppercase tracking-widest">
+              </span>
+            )}
           </div>
 
-          <div className="flex justify-between items-center px-1">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">
-              Change Due
-            </span>
-            <span
-              className={`text-lg font-mono font-black ${change < 0 ? "text-slate-300" : "text-green-600"
-                }`}
-            >
-              {Math.max(0, change)}
-            </span>
-          </div>
+          {/* CHECKOUT BUTTON */}
+          <button
+            onClick={() => canCheckout && onCheckout({ items: cart, cash: cashAmount })}
+            disabled={!canCheckout}
+            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-[0.15em] transition-all
+                ${canCheckout
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl shadow-slate-200 dark:shadow-none active:scale-[0.98]"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+              }`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Processing
+              </span>
+            ) : (
+              "Complete Transaction"
+            )}
+          </button>
         </div>
-
-        <button
-          onClick={() =>
-            canCheckout && onCheckout({ items: cart, cash: cashAmount })
-          }
-          disabled={!canCheckout}
-          className="w-full bg-green-600 text-white py-4 rounded-xl font-black text-lg shadow-lg shadow-green-100
-                             hover:bg-green-700 active:scale-[0.98] disabled:bg-slate-200 disabled:text-slate-400 
-                             disabled:shadow-none transition-all flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <span className="animate-pulse">Processing...</span>
-          ) : (
-            <>
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              Complete Transaction
-            </>
-          )}
-        </button>
       </div>
 
-      {/* CONFIRM DIALOG */}
       <ConfirmDialog
         open={confirmOpen}
         title="Clear Cart?"
-        message="This will remove all items from the cart."
+        message="Remove all items?"
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
           onClearCart();

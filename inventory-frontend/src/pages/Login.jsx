@@ -38,42 +38,76 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="min-h-screen flex items-center justify-center 
+    bg-slate-100 dark:bg-slate-900 px-4">
+
             <form
                 onSubmit={submit}
-                className="w-full max-w-sm bg-white p-6 rounded shadow"
+                className="w-full max-w-sm 
+        bg-white dark:bg-slate-800 
+        p-8 rounded-2xl shadow-xl 
+        border border-slate-200 dark:border-slate-700
+        space-y-5"
             >
-                <h2 className="text-2xl font-bold mb-4 text-center">
-                    Zhaneyaa Agriveets Inventory Login
-                </h2>
 
+                {/* TITLE */}
+                <div className="text-center">
+                    <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">
+                        Zhaneyaa Agriveets
+                    </h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        Inventory System Login
+                    </p>
+                </div>
+
+                {/* ERROR */}
                 {error && (
-                    <p className="mb-3 text-sm text-red-600">{error}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400 text-center">
+                        {error}
+                    </p>
                 )}
 
-                <input
-                    className="w-full mb-3 px-3 py-2 border rounded"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
+                {/* NAME */}
+                <div>
+                    <input
+                        className="w-full px-4 py-2.5 rounded-xl outline-none transition-all
+                bg-slate-50 dark:bg-slate-700
+                text-slate-900 dark:text-white
+                border border-slate-200 dark:border-slate-600
+                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/30"
+                        placeholder="Username"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </div>
 
-                <input
-                    type="password"
-                    className="w-full mb-4 px-3 py-2 border rounded"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                {/* PASSWORD */}
+                <div>
+                    <input
+                        type="password"
+                        className="w-full px-4 py-2.5 rounded-xl outline-none transition-all
+                bg-slate-50 dark:bg-slate-700
+                text-slate-900 dark:text-white
+                border border-slate-200 dark:border-slate-600
+                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/30"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
 
+                {/* BUTTON */}
                 <button
                     disabled={loading}
-                    className="w-full bg-slate-800 text-white py-2 rounded disabled:opacity-60"
+                    className="w-full py-3 rounded-xl font-bold transition-all
+            bg-indigo-600 hover:bg-indigo-700 text-white
+            disabled:opacity-50 active:scale-[0.98]"
                 >
                     {loading ? "Logging in..." : "Login"}
                 </button>
+
             </form>
         </div>
     );

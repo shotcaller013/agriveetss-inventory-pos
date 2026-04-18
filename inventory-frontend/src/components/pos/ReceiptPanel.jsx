@@ -15,12 +15,17 @@ export default function ReceiptPanel({ receipt, onDone }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 animate-in fade-in duration-300">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 animate-in fade-in duration-300">
       {/* Scrollable Receipt Preview Area */}
       <div className="flex-1 overflow-y-auto flex justify-center p-4 custom-scrollbar">
         <div
           id="receipt-content"
-          className="w-full max-w-[320px] bg-white p-6 font-mono text-slate-900 relative shadow-md rounded-sm h-fit border border-slate-200"
+          className="w-full max-w-[320px] 
+  bg-white dark:bg-slate-800 
+  p-6 font-mono 
+  text-slate-900 dark:text-slate-100
+  relative shadow-md rounded-sm h-fit 
+  border border-slate-200 dark:border-slate-700"
         >
           {/* Header Status (Screen only) */}
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-1 rounded-full flex items-center gap-1.5 shadow-md print:hidden transition-transform hover:scale-105">
@@ -32,11 +37,11 @@ export default function ReceiptPanel({ receipt, onDone }) {
 
           {/* Store Branding */}
           <div className="text-center mb-6 pt-4">
-            <h2 className="text-3xl font-serif font-black tracking-tighter text-slate-950">
+            <h2 className="text-3xl font-serif font-black tracking-tighter text-slate-950 dark:text-white">
               DANGSKIE
             </h2>
             <div className="h-[1px] w-20 bg-slate-300 mx-auto my-2" />
-            <p className="text-[10px] uppercase text-slate-500 font-sans leading-relaxed">
+            <p className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-sans leading-relaxed">
               Pulpog, Sabang, Leyte <br />
               <span className="tracking-widest">TIN: 000-123-456-000</span>
             </p>
@@ -46,7 +51,7 @@ export default function ReceiptPanel({ receipt, onDone }) {
           <div className="text-[10px] border-y border-dashed border-slate-300 py-3 mb-4 space-y-1.5">
             <div className="flex justify-between">
               <span className="text-slate-400">REFERENCE:</span>
-              <span className="font-bold text-slate-900">
+              <span className="font-bold text-slate-900 dark:text-slate-200">
                 #{receipt.reference?.toUpperCase()}
               </span>
             </div>
@@ -72,14 +77,14 @@ export default function ReceiptPanel({ receipt, onDone }) {
             {receipt.items?.map((item) => (
               <div key={item.id} className="text-[11px] group">
                 <div className="flex justify-between items-start gap-4">
-                  <span className="font-bold uppercase text-slate-800 leading-tight">
+                  <span className="font-bold uppercase text-slate-800 dark:text-slate-200 leading-tight">
                     {item.product?.name}
                   </span>
-                  <span className="font-bold text-slate-900">
+                  <span className="font-bold text-slate-900 dark:text-white">
                     {formatCurrency(item.subtotal)}
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                   {item.quantity} {item.product?.unit_type} @ {formatCurrency(item.unit_price)}
                 </div>
               </div>
@@ -88,18 +93,18 @@ export default function ReceiptPanel({ receipt, onDone }) {
 
           {/* Financials */}
           <div className="space-y-2 border-t-2 border-slate-900 pt-4">
-            <div className="flex justify-between text-[11px] text-slate-600">
+            <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
               <span>SUBTOTAL</span>
               <span>{formatCurrency(receipt.total_price)}</span>
             </div>
-            <div className="flex justify-between text-[11px] font-bold text-slate-700">
+            <div className="flex justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
               <span>CASH TENDERED</span>
               <span>{formatCurrency(receipt.cash_received)}</span>
             </div>
-            
+
             {/* Change Highlight - Softer for cashier eyes */}
-            <div className="flex justify-between text-xl font-black mt-3 p-2 bg-slate-50 border-t border-dashed border-slate-300 print:bg-transparent print:p-0 print:border-none">
-              <span className="text-slate-500 text-sm self-center">CHANGE</span>
+            <div className="flex justify-between text-xl font-black mt-3 p-2 bg-slate-50 dark:bg-slate-700 border-t border-dashed border-slate-300 print:bg-transparent print:p-0 print:border-none">
+              <span className="text-slate-500 dark:text-slate-400 text-sm self-center">CHANGE</span>
               <span className="text-indigo-600 print:text-black">
                 {formatCurrency(receipt.change_given)}
               </span>
@@ -113,7 +118,7 @@ export default function ReceiptPanel({ receipt, onDone }) {
             </div>
             <div className="text-[9px] text-slate-400 uppercase tracking-[0.2em] space-y-1">
               <p className="font-sans">*** Official Receipt ***</p>
-              <p className="font-bold text-slate-600">Thank you for coming!</p>
+              <p className="font-bold text-slate-600 dark:text-slate-400">Thank you for coming!</p>
             </div>
           </div>
 
@@ -130,10 +135,11 @@ export default function ReceiptPanel({ receipt, onDone }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="p-6 bg-white border-t border-slate-200 flex flex-col gap-3 shrink-0 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+      <div className="p-6 bg-white dark:bg-slate-900 
+border-slate-200 dark:border-slate-700 flex flex-col gap-3 shrink-0 print:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
         <button
           onClick={handlePrint}
-          className="flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-[0.15em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-md"
+          className="flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 dark:bg-slate-500 text-white rounded-xl font-bold text-xs uppercase tracking-[0.15em] hover:bg-slate-800 active:scale-[0.98] transition-all shadow-md"
         >
           <Printer size={18} /> Print Receipt
         </button>
@@ -178,7 +184,7 @@ export default function ReceiptPanel({ receipt, onDone }) {
           .font-sans, .font-serif {
             font-family: 'Courier New', Courier, monospace !important;
           }
-          .text-slate-500, .text-slate-400 {
+          .text-slate-500 dark:text-slate-400, .text-slate-400 {
             color: #000 !important;
             opacity: 0.8;
           }
