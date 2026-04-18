@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 
 class ProductController extends Controller
@@ -17,7 +18,14 @@ class ProductController extends Controller
             'cost_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'stock_qty' => 'nullable|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
+        }
 
         $product = Product::create($validated);
 
@@ -30,15 +38,31 @@ class ProductController extends Controller
 
     public function updateProduct(Request $request, $id)
     {
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'unit_type' => 'sometimes|required|in:kg,pcs,pack',
             'cost_price' => 'sometimes|required|numeric|min:0',
             'selling_price' => 'sometimes|required|numeric|min:0',
             'stock_qty' => 'sometimes|nullable|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $product = Product::findOrFail($id);
+        
+
+        if ($request->hasFile('image')) {
+            // delete old image
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            // store new image
+            $path = $request->file('image')->store('products', 'public');
+
+            $validated['image'] = $path;
+        }
+
         $product->update($validated);
 
         return response()->json([
@@ -47,10 +71,9 @@ class ProductController extends Controller
             'product' => $product,
         ]);
     }
-
     public function fetchProduct(Request $request)
     {
-        
+
         $query = Product::orderBy('id');
 
         if ($request->filled('search')) {

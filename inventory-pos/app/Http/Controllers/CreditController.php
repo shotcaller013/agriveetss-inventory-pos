@@ -70,6 +70,11 @@ class CreditController extends Controller
     public function fetchCredits()
     {
         // Eager load everything needed for the UI
+        $overdueCount = Credit::where('due_date', '<', now()->toDateString())
+            ->where('status', '!=', 'paid') // optional
+            ->count();
+
+
         $credits = Credit::with(['items.product', 'payments'])
             ->latest()
             ->get()
@@ -80,7 +85,7 @@ class CreditController extends Controller
                     'id'                => $credit->id,
                     'customer_name'     => $credit->customer_name,
                     'contact_number'    => $credit->contact_number,
-                    'due_date'          => $credit->due_date->format('Y-m-d'),
+                    'due_date'          => $credit->due_date->format('F j, Y'),
                     'total_amount'      => $credit->total_amount,
                     'remaining_balance' => $credit->total_amount - $totalPaid,
                     'status'            => $credit->status,
@@ -98,8 +103,13 @@ class CreditController extends Controller
                 ];
             });
 
-        return response()->json(['credits' => $credits]);
+        return response()->json([
+            'credits' => $credits,
+            'overdueCount' => $overdueCount,
+        ]);
     }
+
+
 
     /**
      * Process a partial or full payment

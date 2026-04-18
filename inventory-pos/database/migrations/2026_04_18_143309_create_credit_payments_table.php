@@ -11,12 +11,17 @@ return new class extends Migration
         Schema::create('credit_payments', function (Blueprint $table) {
             $table->id();
 
+            // foreign key
             $table->foreignId('credit_id')
-                  ->constrained('credits')
-                  ->cascadeOnDelete();
+                ->constrained('credits')
+                ->cascadeOnDelete();
 
+            // data
             $table->decimal('amount_paid', 10, 2);
-            $table->timestamp('paid_at')->useCurrent();
+
+            $table->timestamp('paid_at')
+                  ->useCurrent(); // CURRENT_TIMESTAMP
+
             $table->string('payment_method', 50)->nullable();
             $table->string('reference')->nullable();
 

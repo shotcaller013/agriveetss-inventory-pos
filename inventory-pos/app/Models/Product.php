@@ -15,6 +15,7 @@ class Product extends Model
         'selling_price',
         'stock_qty',
         'reorder_level',
+        'image',
     ];
 
     protected $casts = [
